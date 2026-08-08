@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIVINKEY - Contact Us</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg sticky-top py-2">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="index.html">
+                <img src="assets/logo.png" alt="LIVINKEY logo" height="44" class="me-2">
+                <span class="fw-bold brand-text">LIVINKEY</span>
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navMenu">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="pgs.html">PGs</a></li>
+                    <li class="nav-item"><a class="nav-link" href="about.html">About Us</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="contact.html">Contact</a></li>
+                </ul>
+                <button class="btn btn-download rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#appModal">
+                    <i class="bi bi-phone me-1"></i>Download App
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- APP MODAL -->
+    <div class="modal fade" id="appModal" tabindex="-1">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content p-3 border-0 shadow-lg">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold">Get the App</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body d-flex flex-column gap-3 pt-3">
+                    <a href="#" class="btn btn-dark rounded-pill py-2"><i class="bi bi-google-play me-2"></i>PlayStore</a>
+                    <a href="#" class="btn btn-dark rounded-pill py-2"><i class="bi bi-apple me-2"></i>AppStore</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTENT -->
+    <section class="contact-page py-5">
+        <div class="container">
+            <div class="row mb-5">
+                <div class="col-12 text-center">
+                    <h1 class="fw-bold display-5">Get in Touch</h1>
+                    <div class="divider mx-auto"></div>
+                    <p class="lead">We're here to help you find your perfect PG</p>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-lg-5">
+                    <div class="contact-info p-4 rounded-4 shadow-sm h-100">
+                        <h4 class="fw-bold mb-4">Contact Information</h4>
+                        <div class="contact-item d-flex align-items-center gap-3 mb-3">
+                            <i class="bi bi-whatsapp fs-4 text-success"></i>
+                            <div>
+                                <h6 class="mb-0 fw-bold">WhatsApp</h6>
+                                <a href="https://wa.me/919878383497" class="text-decoration-none">+91 98783 83497</a>
+                            </div>
+                        </div>
+                        <div class="contact-item d-flex align-items-center gap-3 mb-3">
+                            <i class="bi bi-envelope fs-4 text-danger"></i>
+                            <div>
+                                <h6 class="mb-0 fw-bold">Email</h6>
+                                <a href="mailto:livinkey@gmail.com" class="text-decoration-none">livinkey@gmail.com</a>
+                            </div>
+                        </div>
+                        <div class="contact-item d-flex align-items-center gap-3 mb-3">
+                            <i class="bi bi-instagram fs-4 text-danger"></i>
+                            <div>
+                                <h6 class="mb-0 fw-bold">Instagram</h6>
+                                <a href="https://www.instagram.com/livinkey?igsh=MTc0eWdyeTNvcmFtZA==" target="_blank" class="text-decoration-none">@livinkey</a>
+                            </div>
+                        </div>
+                        <div class="contact-item d-flex align-items-center gap-3">
+                            <i class="bi bi-facebook fs-4 text-primary"></i>
+                            <div>
+                                <h6 class="mb-0 fw-bold">Facebook</h6>
+                                <a href="https://www.facebook.com/livin.key.9/" target="_blank" class="text-decoration-none">LIVINKEY</a>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="mt-3">
+                            <h6 class="fw-bold"><i class="bi bi-geo-alt"></i> Office Address</h6>
+                            <p class="mb-0">India, Punjab, 144411, Near LPU, Law Gate<br>Beside Paradise Momos, LIVINKEY PG, Near RS Rooms</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-7">
+                    <div class="map-container rounded-4 overflow-hidden shadow-sm" style="height: 450px;">
+                        <iframe 
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3416.814238493406!2d75.70698937530918!3d31.25329597431689!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x391a5f4aa5b3b3b3%3A0x9e4a3b5c6d7e8f9a!2sLPU%20Law%20Gate!5e0!3m2!1sen!2sin!4v1700000000000" 
+                            width="100%" 
+                            height="100%" 
+                            style="border:0;" 
+                            allowfullscreen="" 
+                            loading="lazy">
+                        </iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="text-center text-muted py-4 mt-4 border-top">
+        <small>© 2026 LIVINKEY · Premium PG Management, Punjab</small>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/script.js"></script>
+</body>
+</html>
