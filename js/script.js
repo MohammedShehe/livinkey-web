@@ -10,7 +10,7 @@ const pgData = [
         status: "vacant",
         rating: 4.8,
         amenities: ["wifi", "ac", "security", "gym"],
-        images: ["assets/pg1-1.jpg", "assets/pg1-2.jpg", "assets/pg1-3.jpg"],
+        images: ["https://placehold.co/600x400/92C24A/FFFFFF?text=Lakeside+1", "https://placehold.co/600x400/92C24A/FFFFFF?text=Lakeside+2", "https://placehold.co/600x400/92C24A/FFFFFF?text=Lakeside+3"],
         reviews: [
             { name: "Rahul S.", comment: "Great place, very clean and friendly staff!" },
             { name: "Priya M.", comment: "Best PG near LPU, highly recommend." }
@@ -26,7 +26,7 @@ const pgData = [
         status: "partially",
         rating: 4.6,
         amenities: ["wifi", "security"],
-        images: ["assets/pg2-1.jpg", "assets/pg2-2.jpg"],
+        images: ["https://placehold.co/600x400/92C24A/FFFFFF?text=Green+Valley+1", "https://placehold.co/600x400/92C24A/FFFFFF?text=Green+Valley+2"],
         reviews: [
             { name: "Amit K.", comment: "Good value for money." },
             { name: "Sneha R.", comment: "Safe and comfortable." }
@@ -42,7 +42,7 @@ const pgData = [
         status: "full",
         rating: 4.9,
         amenities: ["wifi", "ac", "gym"],
-        images: ["assets/pg3-1.jpg", "assets/pg3-2.jpg", "assets/pg3-3.jpg"],
+        images: ["https://placehold.co/600x400/92C24A/FFFFFF?text=Sunrise+1", "https://placehold.co/600x400/92C24A/FFFFFF?text=Sunrise+2", "https://placehold.co/600x400/92C24A/FFFFFF?text=Sunrise+3"],
         reviews: [
             { name: "Vikram P.", comment: "Excellent facilities!" },
             { name: "Neha G.", comment: "Love the community events." }
@@ -58,7 +58,7 @@ const pgData = [
         status: "vacant",
         rating: 4.7,
         amenities: ["wifi", "ac", "security"],
-        images: ["assets/pg4-1.jpg", "assets/pg4-2.jpg"],
+        images: ["https://placehold.co/600x400/92C24A/FFFFFF?text=Paradise+1", "https://placehold.co/600x400/92C24A/FFFFFF?text=Paradise+2"],
         reviews: [
             { name: "Deepak J.", comment: "Perfect location for students." }
         ]
@@ -73,7 +73,7 @@ const pgData = [
         status: "partially",
         rating: 4.5,
         amenities: ["wifi", "ac", "gym", "security"],
-        images: ["assets/pg5-1.jpg", "assets/pg5-2.jpg", "assets/pg5-3.jpg"],
+        images: ["https://placehold.co/600x400/92C24A/FFFFFF?text=Royal+1", "https://placehold.co/600x400/92C24A/FFFFFF?text=Royal+2", "https://placehold.co/600x400/92C24A/FFFFFF?text=Royal+3"],
         reviews: [
             { name: "Anjali T.", comment: "Luxury at affordable price!" }
         ]
@@ -88,7 +88,7 @@ const pgData = [
         status: "vacant",
         rating: 4.3,
         amenities: ["wifi", "security"],
-        images: ["assets/pg6-1.jpg", "assets/pg6-2.jpg"],
+        images: ["https://placehold.co/600x400/92C24A/FFFFFF?text=Peaceful+1", "https://placehold.co/600x400/92C24A/FFFFFF?text=Peaceful+2"],
         reviews: [
             { name: "Mohan R.", comment: "Peaceful environment." }
         ]
@@ -103,7 +103,7 @@ const pgData = [
         status: "full",
         rating: 4.9,
         amenities: ["wifi", "ac", "gym", "security"],
-        images: ["assets/pg7-1.jpg", "assets/pg7-2.jpg"],
+        images: ["https://placehold.co/600x400/92C24A/FFFFFF?text=Elite+1", "https://placehold.co/600x400/92C24A/FFFFFF?text=Elite+2"],
         reviews: [
             { name: "Kiran D.", comment: "Top-notch facilities!" }
         ]
@@ -118,7 +118,7 @@ const pgData = [
         status: "vacant",
         rating: 4.4,
         amenities: ["wifi", "security"],
-        images: ["assets/pg8-1.jpg", "assets/pg8-2.jpg", "assets/pg8-3.jpg"],
+        images: ["https://placehold.co/600x400/92C24A/FFFFFF?text=Garden+1", "https://placehold.co/600x400/92C24A/FFFFFF?text=Garden+2", "https://placehold.co/600x400/92C24A/FFFFFF?text=Garden+3"],
         reviews: [
             { name: "Suresh K.", comment: "Beautiful garden area." }
         ]
@@ -133,7 +133,7 @@ const pgData = [
         status: "partially",
         rating: 4.6,
         amenities: ["wifi", "ac"],
-        images: ["assets/pg9-1.jpg", "assets/pg9-2.jpg"],
+        images: ["https://placehold.co/600x400/92C24A/FFFFFF?text=City+Light+1", "https://placehold.co/600x400/92C24A/FFFFFF?text=City+Light+2"],
         reviews: [
             { name: "Pooja S.", comment: "Convenient location." }
         ]
@@ -148,7 +148,7 @@ const pgData = [
         status: "vacant",
         rating: 4.7,
         amenities: ["wifi", "ac", "security"],
-        images: ["assets/pg10-1.jpg", "assets/pg10-2.jpg"],
+        images: ["https://placehold.co/600x400/92C24A/FFFFFF?text=Comfort+1", "https://placehold.co/600x400/92C24A/FFFFFF?text=Comfort+2"],
         reviews: [
             { name: "Ravi G.", comment: "Very comfortable stay." }
         ]
@@ -170,7 +170,7 @@ function renderPGCards(data, containerId) {
         col.className = 'col-lg-3 col-md-4 col-sm-6';
         col.innerHTML = `
             <div class="pg-card" data-id="${pg.id}">
-                <img src="${pg.images[0] || 'assets/placeholder.jpg'}" class="pg-card-img" alt="${pg.name}">
+                <img src="${pg.images[0] || 'https://placehold.co/600x400/92C24A/FFFFFF?text=No+Image'}" class="pg-card-img" alt="${pg.name}">
                 <div class="p-3">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <h5 class="fw-bold mb-0">${pg.name}</h5>
