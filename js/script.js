@@ -155,31 +155,65 @@ const pgData = [
     }
 ];
 
-// Function to render PG Cards
+/* ===================== HELPERS: button loading state ===================== */
+function setButtonLoading(btn, isLoading) {
+    if (!btn) return;
+    if (isLoading) {
+        btn.classList.add('is-loading');
+        btn.disabled = true;
+    } else {
+        btn.classList.remove('is-loading');
+        btn.disabled = false;
+    }
+}
+
+function wrapButtonLabel(btn) {
+    // wraps existing button content in a span so it can be hidden while spinner shows
+    if (!btn || btn.querySelector('.btn-label')) return;
+    const span = document.createElement('span');
+    span.className = 'btn-label';
+    span.innerHTML = btn.innerHTML;
+    btn.innerHTML = '';
+    btn.appendChild(span);
+}
+
+/* ===================== Function to render PG Cards ===================== */
 function renderPGCards(data, containerId) {
     const container = document.getElementById(containerId);
     if (!container) return;
-    
+
     container.innerHTML = '';
-    data.forEach(pg => {
+
+    if (data.length === 0) {
+        container.innerHTML = `
+            <div class="col-12 text-center py-5">
+                <i class="bi bi-house-x fs-1" style="color: var(--line-strong);"></i>
+                <p class="mt-3 fw-semibold" style="color: var(--ink-soft);">No PGs match your filters. Try widening your search.</p>
+            </div>`;
+        return;
+    }
+
+    data.forEach((pg, index) => {
         const statusClass = pg.status === 'vacant' ? 'status-vacant' : pg.status === 'partially' ? 'status-partial' : 'status-full';
         const statusText = pg.status === 'vacant' ? 'Vacant' : pg.status === 'partially' ? 'Partially Occupied' : 'Full Occupied';
-        const stars = '★'.repeat(Math.floor(pg.rating)) + '☆'.repeat(5 - Math.floor(pg.rating));
-        
+
         const col = document.createElement('div');
-        col.className = 'col-lg-3 col-md-4 col-sm-6';
+        col.className = 'col-lg-3 col-md-4 col-sm-6 reveal';
+        col.style.transitionDelay = `${Math.min(index, 8) * 0.06}s`;
         col.innerHTML = `
             <div class="pg-card" data-id="${pg.id}">
-                <img src="${pg.images[0] || 'https://placehold.co/600x400/92C24A/FFFFFF?text=No+Image'}" class="pg-card-img" alt="${pg.name}">
+                <div class="pg-card-img-wrap">
+                    <img src="${pg.images[0] || 'https://placehold.co/600x400/92C24A/FFFFFF?text=No+Image'}" class="pg-card-img" alt="${pg.name}" loading="lazy">
+                </div>
                 <div class="p-3">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <h5 class="fw-bold mb-0">${pg.name}</h5>
-                        <span class="rating-badge">★ ${pg.rating}</span>
+                        <span class="rating-badge">${pg.rating}</span>
                     </div>
                     <p class="small text-muted mb-2"><i class="bi bi-geo-alt"></i> ${pg.location}</p>
                     <div class="d-flex justify-content-between align-items-center">
                         <span class="pg-status ${statusClass}">${statusText}</span>
-                        <span class="fw-bold text-success">₹${pg.rent}/mo</span>
+                        <span class="fw-bold text-success">₹${pg.rent.toLocaleString('en-IN')}/mo</span>
                     </div>
                     <div class="mt-2 small">
                         <span>🛏 ${pg.rooms} rooms</span>
@@ -193,37 +227,45 @@ function renderPGCards(data, containerId) {
 
     // Add click event to cards
     document.querySelectorAll('.pg-card').forEach(card => {
-        card.addEventListener('click', function() {
+        card.addEventListener('click', function () {
             const id = parseInt(this.dataset.id);
             const pg = pgData.find(p => p.id === id);
             if (pg) openDetailModal(pg);
         });
     });
+
+    observeReveals();
 }
 
-// Function to open detail modal
+/* ===================== Function to open detail modal ===================== */
 function openDetailModal(pg) {
     document.getElementById('detailPgName').textContent = pg.name;
     document.getElementById('detailLocation').textContent = pg.location;
-    document.getElementById('detailRent').textContent = pg.rent;
+    document.getElementById('detailRent').textContent = pg.rent.toLocaleString('en-IN');
     document.getElementById('detailRooms').textContent = pg.rooms;
     document.getElementById('detailAvailable').textContent = pg.available;
-    
+
     // Amenities
     const amenityMap = { wifi: 'WiFi', ac: 'AC', security: 'Security', gym: 'Gym' };
     const amenityList = pg.amenities.map(a => amenityMap[a] || a).join(', ');
     document.getElementById('detailAmenities').textContent = amenityList || 'None specified';
-    
+
     // Reviews
     const reviewContainer = document.getElementById('detailReviews');
     reviewContainer.innerHTML = '';
     pg.reviews.forEach(review => {
+        const initials = review.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
         const div = document.createElement('div');
-        div.className = 'mb-2 p-2 bg-light rounded';
-        div.innerHTML = `<strong>${review.name}</strong><br><small>${review.comment}</small>`;
+        div.className = 'review-card';
+        div.innerHTML = `
+            <div class="review-avatar">${initials}</div>
+            <div>
+                <strong>${review.name}</strong><br>
+                <small>${review.comment}</small>
+            </div>`;
         reviewContainer.appendChild(div);
     });
-    
+
     // Carousel
     const carouselInner = document.getElementById('detailCarouselInner');
     carouselInner.innerHTML = '';
@@ -233,56 +275,157 @@ function openDetailModal(pg) {
         div.innerHTML = `<img src="${img}" class="d-block w-100" style="height: 350px; object-fit: cover;" alt="${pg.name}">`;
         carouselInner.appendChild(div);
     });
-    
+
     // Open modal
     const modal = new bootstrap.Modal(document.getElementById('pgDetailModal'));
     modal.show();
 }
 
-// Filter and search functionality
+/* ===================== Filter and search functionality ===================== */
 function filterPGs() {
+    const searchBtn = document.getElementById('searchBtn');
+    setButtonLoading(searchBtn, true);
+
     const searchTerm = document.getElementById('searchInput')?.value.toLowerCase() || '';
     const amenityFilter = document.getElementById('amenityFilter')?.value || 'all';
     const occupancyFilter = document.getElementById('occupancyFilter')?.value || 'all';
-    
-    const filtered = pgData.filter(pg => {
-        const matchSearch = pg.name.toLowerCase().includes(searchTerm) || 
-                           pg.location.toLowerCase().includes(searchTerm);
-        const matchAmenity = amenityFilter === 'all' || pg.amenities.includes(amenityFilter);
-        const matchOccupancy = occupancyFilter === 'all' || pg.status === occupancyFilter;
-        return matchSearch && matchAmenity && matchOccupancy;
-    });
-    
-    renderPGCards(filtered, 'pgCardContainer');
+
+    setTimeout(() => {
+        const filtered = pgData.filter(pg => {
+            const matchSearch = pg.name.toLowerCase().includes(searchTerm) ||
+                pg.location.toLowerCase().includes(searchTerm);
+            const matchAmenity = amenityFilter === 'all' || pg.amenities.includes(amenityFilter);
+            const matchOccupancy = occupancyFilter === 'all' || pg.status === occupancyFilter;
+            return matchSearch && matchAmenity && matchOccupancy;
+        });
+
+        renderPGCards(filtered, 'pgCardContainer');
+        setButtonLoading(searchBtn, false);
+    }, 380); // brief, honest delay so the spinner is perceptible
 }
 
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', function() {
+/* ===================== Scroll reveal (IntersectionObserver) ===================== */
+let revealObserver;
+function observeReveals() {
+    if (!('IntersectionObserver' in window)) {
+        document.querySelectorAll('.reveal').forEach(el => el.classList.add('is-visible'));
+        return;
+    }
+    if (!revealObserver) {
+        revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    }
+    document.querySelectorAll('.reveal:not(.is-visible)').forEach(el => revealObserver.observe(el));
+}
+
+/* ===================== Count-up stats ===================== */
+function animateCounters() {
+    const counters = document.querySelectorAll('[data-count-to]');
+    if (!counters.length) return;
+
+    const runCounter = (el) => {
+        const target = parseInt(el.dataset.countTo, 10);
+        const suffix = el.dataset.suffix || '';
+        const duration = 1200;
+        const start = performance.now();
+
+        function tick(now) {
+            const progress = Math.min((now - start) / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            el.textContent = Math.round(eased * target) + suffix;
+            if (progress < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+    };
+
+    if (!('IntersectionObserver' in window)) {
+        counters.forEach(runCounter);
+        return;
+    }
+    const obs = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                runCounter(entry.target);
+                obs.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.5 });
+    counters.forEach(el => obs.observe(el));
+}
+
+/* ===================== Navbar scroll shadow ===================== */
+function initNavbarScroll() {
+    const nav = document.querySelector('.navbar');
+    if (!nav) return;
+    const onScroll = () => {
+        nav.classList.toggle('scrolled', window.scrollY > 12);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+}
+
+/* ===================== Initialize on page load ===================== */
+document.addEventListener('DOMContentLoaded', function () {
+    initNavbarScroll();
+
+    // wrap labels on buttons that get a loading state
+    ['searchBtn', 'helpFormSubmit'].forEach(id => wrapButtonLabel(document.getElementById(id)));
+    document.querySelectorAll('.app-download-tab').forEach(btn => wrapButtonLabel(btn));
+
     // Home page top 10
     if (document.getElementById('topPropertiesContainer')) {
         renderPGCards(pgData.slice(0, 10), 'topPropertiesContainer');
     }
-    
+
     // PGs page
     if (document.getElementById('pgCardContainer')) {
         renderPGCards(pgData, 'pgCardContainer');
-        
+
         // Search event listeners
         document.getElementById('searchBtn')?.addEventListener('click', filterPGs);
-        document.getElementById('searchInput')?.addEventListener('keyup', function(e) {
+        document.getElementById('searchInput')?.addEventListener('keyup', function (e) {
             if (e.key === 'Enter') filterPGs();
         });
         document.getElementById('amenityFilter')?.addEventListener('change', filterPGs);
         document.getElementById('occupancyFilter')?.addEventListener('change', filterPGs);
     }
-    
-    // Help form - WhatsApp redirect
-    document.getElementById('helpForm')?.addEventListener('submit', function(e) {
+
+    // Help form - WhatsApp redirect (with loading spinner)
+    document.getElementById('helpForm')?.addEventListener('submit', function (e) {
         e.preventDefault();
-        const name = this.querySelector('input[placeholder="Your Name"]').value;
-        const phone = this.querySelector('input[placeholder="Phone Number"]').value;
-        const message = this.querySelector('textarea').value;
+        const submitBtn = document.getElementById('helpFormSubmit');
+        setButtonLoading(submitBtn, true);
+
+        const name = document.getElementById('helpName').value;
+        const phone = document.getElementById('helpPhone').value;
+        const message = document.getElementById('helpMessage').value;
         const whatsappMsg = `Hi LIVINKEY!%0A%0AName: ${encodeURIComponent(name)}%0APhone: ${encodeURIComponent(phone)}%0AMessage: ${encodeURIComponent(message)}`;
-        window.open(`https://wa.me/919878383497?text=${whatsappMsg}`, '_blank');
+
+        setTimeout(() => {
+            window.open(`https://wa.me/919878383497?text=${whatsappMsg}`, '_blank');
+            setButtonLoading(submitBtn, false);
+        }, 500);
     });
+
+    // App download buttons — brief loading feel before opening store links
+    document.querySelectorAll('.app-download-tab').forEach(btn => {
+        btn.addEventListener('click', function (e) {
+            if (this.getAttribute('href') === '#') e.preventDefault();
+            setButtonLoading(this, true);
+            setTimeout(() => setButtonLoading(this, false), 600);
+        });
+    });
+
+    // Scroll reveal + counters
+    document.querySelectorAll('section, .about-card, .contact-info, .map-container').forEach(el => {
+        if (!el.classList.contains('reveal')) el.classList.add('reveal');
+    });
+    observeReveals();
+    animateCounters();
 });
