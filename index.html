@@ -3,184 +3,410 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LIVINKEY - A COMPLETE HOME</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <title>LIVINKEY - Premium PG Management</title>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="css/style.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: #FBFBF6;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* Animated background gradient */
+        body::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: 
+                radial-gradient(ellipse 600px 400px at 20% 80%, rgba(146, 194, 74, 0.08), transparent 60%),
+                radial-gradient(ellipse 500px 500px at 80% 20%, rgba(146, 194, 74, 0.06), transparent 50%),
+                radial-gradient(ellipse 300px 300px at 50% 50%, rgba(146, 194, 74, 0.04), transparent 70%);
+            z-index: 0;
+        }
+        
+        /* Floating decorative elements */
+        body::after {
+            content: '✦';
+            position: absolute;
+            font-size: 3rem;
+            color: rgba(146, 194, 74, 0.08);
+            top: 10%;
+            right: 15%;
+            animation: floatOrb 8s ease-in-out infinite;
+        }
+        
+        .splash-container {
+            text-align: center;
+            padding: 2rem;
+            animation: fadeIn 1s cubic-bezier(0.22, 1, 0.36, 1);
+            position: relative;
+            z-index: 1;
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        .splash-logo-wrapper {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 2.5rem;
+        }
+        
+        .splash-logo-wrapper::before {
+            content: '';
+            position: absolute;
+            inset: -20px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(146, 194, 74, 0.10), transparent 70%);
+            animation: logoGlow 3s ease-in-out infinite;
+        }
+        
+        .splash-logo {
+            position: relative;
+            display: inline-block;
+            animation: logoFloat 3s ease-in-out infinite;
+        }
+        
+        .splash-logo img {
+            height: 90px;
+            width: auto;
+            display: block;
+            filter: drop-shadow(0 8px 30px rgba(20, 23, 15, 0.08));
+            transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        
+        .splash-logo:hover img {
+            transform: scale(1.06) rotate(-2deg);
+        }
+        
+        /* Decorative ring around logo */
+        .splash-logo-wrapper::after {
+            content: '';
+            position: absolute;
+            inset: -25px;
+            border-radius: 50%;
+            border: 1.5px solid rgba(146, 194, 74, 0.15);
+            animation: ringSpin 20s linear infinite;
+        }
+        
+        .splash-brand {
+            font-family: 'Fraunces', serif;
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: #14170F;
+            letter-spacing: -0.03em;
+            margin-top: 0.5rem;
+            line-height: 1.1;
+        }
+        
+        .splash-brand span {
+            color: #92C24A;
+            position: relative;
+        }
+        
+        .splash-brand span::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: rgba(146, 194, 74, 0.25);
+            border-radius: 4px;
+            animation: underlinePulse 2s ease-in-out infinite;
+        }
+        
+        .splash-tagline {
+            color: #3A3F32;
+            font-weight: 500;
+            font-size: 1.05rem;
+            margin-top: 0.35rem;
+            opacity: 0.7;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+        }
+        
+        /* Decorative line with key icon */
+        .splash-divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin: 2rem auto 2.5rem;
+            max-width: 280px;
+        }
+        
+        .splash-divider::before,
+        .splash-divider::after {
+            content: '';
+            flex: 1;
+            height: 1.5px;
+            background: linear-gradient(to right, transparent, rgba(20, 23, 15, 0.12), transparent);
+        }
+        
+        .splash-divider .key-icon {
+            font-size: 1.1rem;
+            color: #92C24A;
+            animation: keyPulse 2.5s ease-in-out infinite;
+        }
+        
+        .dots-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            margin-top: 0;
+        }
+        
+        .dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            animation: dotBounce 1.6s ease-in-out infinite;
+            box-shadow: 0 2px 8px rgba(146, 194, 74, 0.2);
+        }
+        
+        .dot:nth-child(1) {
+            animation-delay: 0s;
+            background: #5E8A2E;
+        }
+        
+        .dot:nth-child(2) {
+            animation-delay: 0.2s;
+            background: #92C24A;
+        }
+        
+        .dot:nth-child(3) {
+            animation-delay: 0.4s;
+            background: #B5D97A;
+        }
+        
+        .splash-loader {
+            margin-top: 2.5rem;
+            width: 220px;
+            height: 3px;
+            background: rgba(20, 23, 15, 0.06);
+            border-radius: 4px;
+            margin-left: auto;
+            margin-right: auto;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .splash-loader-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #92C24A, #5E8A2E, #92C24A);
+            border-radius: 4px;
+            animation: loadProgress 2.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            width: 0%;
+            background-size: 200% 100%;
+            animation: loadProgress 2.8s ease-in-out forwards, shimmer 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        .splash-footer {
+            position: fixed;
+            bottom: 2.5rem;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: #3A3F32;
+            font-size: 0.75rem;
+            opacity: 0.4;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            z-index: 1;
+        }
+        
+        .splash-footer span {
+            display: inline-block;
+            padding: 0 20px;
+            position: relative;
+        }
+        
+        .splash-footer span::before,
+        .splash-footer span::after {
+            content: '·';
+            opacity: 0.5;
+            margin: 0 8px;
+        }
+        
+        /* Keyframe Animations */
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(30px) scale(0.96);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        @keyframes logoFloat {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-8px);
+            }
+        }
+        
+        @keyframes logoGlow {
+            0%, 100% {
+                opacity: 0.5;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.1);
+            }
+        }
+        
+        @keyframes ringSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes keyPulse {
+            0%, 100% {
+                transform: scale(1) rotate(0deg);
+            }
+            50% {
+                transform: scale(1.2) rotate(15deg);
+            }
+        }
+        
+        @keyframes dotBounce {
+            0%, 80%, 100% {
+                transform: scale(0.5);
+                opacity: 0.3;
+            }
+            40% {
+                transform: scale(1.3);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes loadProgress {
+            0% { width: 0%; }
+            30% { width: 40%; }
+            60% { width: 75%; }
+            90% { width: 95%; }
+            100% { width: 100%; }
+        }
+        
+        @keyframes underlinePulse {
+            0%, 100% {
+                opacity: 0.25;
+                transform: scaleX(1);
+            }
+            50% {
+                opacity: 0.6;
+                transform: scaleX(1.1);
+            }
+        }
+        
+        @keyframes floatOrb {
+            0%, 100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            33% {
+                transform: translate(-20px, -30px) rotate(120deg);
+            }
+            66% {
+                transform: translate(20px, -15px) rotate(240deg);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .splash-brand {
+                font-size: 2rem;
+            }
+            .splash-logo img {
+                height: 65px;
+            }
+            .dot {
+                width: 13px;
+                height: 13px;
+            }
+            .splash-loader {
+                width: 180px;
+            }
+            .splash-logo-wrapper::after {
+                inset: -18px;
+            }
+            .splash-divider {
+                max-width: 200px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .splash-brand {
+                font-size: 1.6rem;
+            }
+            .splash-logo img {
+                height: 55px;
+            }
+            .splash-tagline {
+                font-size: 0.8rem;
+                letter-spacing: 0.1em;
+            }
+            .dot {
+                width: 11px;
+                height: 11px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <!-- NAVBAR -->
-    <nav class="navbar navbar-expand-lg sticky-top py-2">
-        <div class="container">
-            <a class="navbar-brand d-flex align-items-center" href="index.html">
-                <img src="assets/logo.png" alt="LIVINKEY logo" height="56" class="me-2" />
-                <!-- no text, only logo -->
-            </a>
-            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navMenu">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item"><a class="nav-link active" href="index.html">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="pgs.html">PGs</a></li>
-                    <li class="nav-item"><a class="nav-link" href="about.html">About Us</a></li>
-                    <li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
-                </ul>
-                <button class="btn btn-download rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#appModal">
-                    <i class="bi bi-phone me-1"></i>Download App
-                </button>
+    <div class="splash-container">
+        <div class="splash-logo-wrapper">
+            <div class="splash-logo">
+                <img src="assets/logo.png" alt="LIVINKEY" />
             </div>
         </div>
-    </nav>
-
-    <!-- APP MODAL with QR codes -->
-    <div class="modal fade" id="appModal" tabindex="-1">
-        <div class="modal-dialog modal-sm modal-dialog-centered">
-            <div class="modal-content p-3 border-0 shadow-lg">
-                <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title fw-bold">Get the App</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body d-flex flex-column gap-3 pt-3 align-items-center">
-                    <div class="app-download-tab text-center">
-                        <div class="qr-frame">
-                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://play.google.com/store/apps/details?id=com.livinkey" alt="PlayStore QR" />
-                        </div>
-                        <a href="#" class="btn btn-dark rounded-pill py-2 w-100"><i class="bi bi-google-play me-2"></i>PlayStore</a>
-                    </div>
-                    <div class="app-download-tab text-center">
-                        <div class="qr-frame">
-                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://apps.apple.com/app/livinkey/id123456789" alt="AppStore QR" />
-                        </div>
-                        <a href="#" class="btn btn-dark rounded-pill py-2 w-100"><i class="bi bi-apple me-2"></i>AppStore</a>
-                    </div>
-                </div>
-            </div>
+        
+        <p class="splash-tagline">Premium PG Management</p>
+        
+        <div class="splash-divider">
+            <span class="key-icon">🔑</span>
+        </div>
+        
+        <div class="dots-container">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        </div>
+        
+        <div class="splash-loader">
+            <div class="splash-loader-bar"></div>
         </div>
     </div>
-
-    <!-- HERO -->
-    <section class="hero-section py-5">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-lg-6">
-                    <span class="hero-eyebrow"><i class="bi bi-key-fill"></i> Punjab's Trusted PG Network</span>
-                    <h1 class="display-4 fw-bold mb-3">Find Your Perfect <span class="text-highlight">PG</span> in Punjab</h1>
-                    <p class="lead mb-4">LIVINKEY offers premium, fully-furnished PG accommodations with modern amenities. Your home away from home.</p>
-                    <a href="pgs.html" class="btn btn-primary btn-lg rounded-pill px-5">Explore PGs</a>
-                </div>
-                <div class="col-lg-6">
-                    <div class="hero-image-frame">
-                        <img src="https://placehold.co/600x400/92C24A/FFFFFF?text=PG+Living" alt="PG Accommodation" class="img-fluid" style="max-height: 400px; width: 100%; object-fit: cover;" />
-                        <div class="hero-tag-badge"><span class="dot"></span>50+ properties, live now</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- STORY -->
-    <section class="story-section py-5">
-        <div class="container">
-            <div class="row">
-                <div class="col-12 text-center mb-4">
-                    <h2 class="fw-bold">Our Story</h2>
-                    <div class="divider mx-auto"><i class="bi bi-key-fill divider-key"></i></div>
-                </div>
-            </div>
-            <div class="row align-items-center">
-                <div class="col-lg-6">
-                    <img src="https://placehold.co/600x400/000000/92C24A?text=LIVINKEY+Team" alt="LIVINKEY Story" class="img-fluid rounded-4 shadow-sm" />
-                </div>
-                <div class="col-lg-6">
-                    <h3 class="fw-bold">Revolutionizing PG Living</h3>
-                    <p class="lead">LIVINKEY was founded with a vision to transform the PG accommodation experience in Punjab. We understand the needs of students and working professionals who seek comfort, security, and community.</p>
-                    <p>Starting from a single property near LPU, we've grown to manage over 50 premium properties across Punjab. Our commitment to quality, transparency, and tenant satisfaction has made us the most trusted PG management company in the region.</p>
-                    <div class="row mt-4">
-                        <div class="col-6">
-                            <div class="stat-box text-center">
-                                <h3 class="fw-bold text-highlight" data-count-to="50" data-suffix="+">0+</h3>
-                                <p>Properties</p>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="stat-box text-center">
-                                <h3 class="fw-bold text-highlight" data-count-to="1000" data-suffix="+">0+</h3>
-                                <p>Happy Tenants</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- HELP FORM -->
-    <section class="help-section py-5">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-8">
-                    <div class="help-form-card p-4 p-md-5 rounded-4 shadow">
-                        <h3 class="fw-bold text-center mb-3">Need Help? Contact Us</h3>
-                        <p class="text-center text-muted mb-4">We'll get back to you within 24 hours</p>
-                        <form id="helpForm">
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <div class="field-group">
-                                        <input type="text" id="helpName" placeholder=" " required />
-                                        <label for="helpName">Your Name</label>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="field-group">
-                                        <input type="email" id="helpEmail" placeholder=" " required />
-                                        <label for="helpEmail">Email Address</label>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="field-group">
-                                        <input type="text" id="helpPhone" placeholder=" " required />
-                                        <label for="helpPhone">Phone Number</label>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="field-group">
-                                        <textarea rows="4" id="helpMessage" placeholder=" " required></textarea>
-                                        <label for="helpMessage">Your Message...</label>
-                                    </div>
-                                </div>
-                                <div class="col-12 text-center">
-                                    <button type="submit" id="helpFormSubmit" class="btn btn-success btn-lg rounded-pill px-5">Send via WhatsApp</button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- TOP 10 -->
-    <section class="top-properties py-5">
-        <div class="container">
-            <div class="row">
-                <div class="col-12 text-center mb-4">
-                    <h2 class="fw-bold">Top 10 PGs</h2>
-                    <div class="divider mx-auto"><i class="bi bi-key-fill divider-key"></i></div>
-                </div>
-            </div>
-            <div class="row g-4" id="topPropertiesContainer"></div>
-        </div>
-    </section>
-
-    <footer class="text-center text-muted py-4 mt-4 border-top">
-        <small>© 2026 LIVINKEY · Premium PG Management, Punjab</small>
-    </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="js/script.js"></script>
+    
+    <div class="splash-footer">
+        <span>© 2022 LIVINKEY</span> <span>Premium PG Management</span> <span>Punjab</span>
+    </div>
+    
+    <script>
+        // Auto-redirect to home after loading
+        setTimeout(() => {
+            window.location.href = 'home.html';
+        }, 3000);
+    </script>
 </body>
 </html>
