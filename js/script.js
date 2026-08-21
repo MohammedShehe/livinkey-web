@@ -351,8 +351,8 @@ function initChatbot() {
         const msg = message.toLowerCase();
         
         const responses = {
-            'rent': 'Our PG rents range from ₹7,000 to ₹10,500 per month, depending on the property and amenities. You can check individual PG listings for exact prices!',
-            'price': 'Our PG rents range from ₹7,000 to ₹10,500 per month, depending on the property and amenities. You can check individual PG listings for exact prices!',
+            'rent': 'Our PG rents range from ₹11,000 to ₹13,000 per month, depending on the property and amenities. You can check individual PG listings for exact prices!',
+            'price': 'Our PG rents range from ₹11,000 to ₹13,000 per month, depending on the property and amenities. You can check individual PG listings for exact prices!',
             'ac': 'Yes! Many of our PGs offer AC rooms. Properties like Sunrise PG, Royal PG, and Elite PG all have AC facilities. Check the amenities section of each PG for details.',
             'food': 'Most of our PGs do not include food in the rent. However, each property has a fully-equipped kitchen where you can cook, and many are located near restaurants and food joints.',
             'amenities': 'Our amenities vary by property but commonly include: WiFi, AC, 24/7 Security, CCTV, Gym, Power Backup, Water Purifier, and Common Areas. Check individual PG listings for specific amenities.',
