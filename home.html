@@ -77,7 +77,7 @@
                 <div class="col-lg-6">
                     <div class="hero-image-frame">
                         <img src="https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=800" alt="PG Accommodation" class="img-fluid" style="max-height: 400px; width: 100%; object-fit: cover;" loading="lazy" />
-                        <div class="hero-tag-badge"><span class="dot"></span>50+ properties, live now</div>
+                        <div class="hero-tag-badge"><span class="dot"></span><span id="heroPGCount">50+</span> properties, live now</div>
                     </div>
                 </div>
             </div>
@@ -100,7 +100,7 @@
                 <div class="col-lg-6">
                     <h3 class="fw-bold">Revolutionizing PG Living</h3>
                     <p class="lead">LIVINKEY was founded with a vision to transform the PG accommodation experience in Punjab. We understand the needs of students and working professionals who seek comfort, security, and community.</p>
-                    <p>Starting from a single property near LPU, we've grown to manage over 50 premium properties across Punjab. Our commitment to quality, transparency, and tenant satisfaction has made us the most trusted PG management company in the region.</p>
+                    <p>Starting from a single property near LPU, we've grown to manage premium properties across Punjab. Our commitment to quality, transparency, and tenant satisfaction has made us the most trusted PG management company in the region.</p>
                     <div class="row mt-4">
                         <div class="col-6">
                             <div class="stat-box text-center">
@@ -174,7 +174,15 @@
                     <div class="divider mx-auto"><i class="bi bi-key-fill divider-key"></i></div>
                 </div>
             </div>
-            <div class="row g-4" id="topPropertiesContainer"></div>
+            <div class="row g-4" id="topPropertiesContainer">
+                <!-- Rendered by JavaScript -->
+                <div class="col-12 text-center py-5">
+                    <div class="spinner-border text-success" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3 text-muted">Loading PGs...</p>
+                </div>
+            </div>
         </div>
     </section>
 
