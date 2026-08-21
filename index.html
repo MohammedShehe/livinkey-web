@@ -207,10 +207,9 @@
             height: 100%;
             background: linear-gradient(90deg, #92C24A, #5E8A2E, #92C24A);
             border-radius: 4px;
-            animation: loadProgress 2.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            animation: loadProgress 2.8s ease-in-out forwards, shimmer 1.5s ease-in-out infinite;
             width: 0%;
             background-size: 200% 100%;
-            animation: loadProgress 2.8s ease-in-out forwards, shimmer 1.5s ease-in-out infinite;
         }
         
         @keyframes shimmer {
@@ -234,7 +233,7 @@
         
         .splash-footer span {
             display: inline-block;
-            padding: 0 20px;
+            padding: 0 12px;
             position: relative;
         }
         
@@ -242,7 +241,7 @@
         .splash-footer span::after {
             content: '·';
             opacity: 0.5;
-            margin: 0 8px;
+            margin: 0 4px;
         }
         
         /* Keyframe Animations */
@@ -333,6 +332,7 @@
             }
         }
         
+        /* RESPONSIVE */
         @media (max-width: 768px) {
             .splash-brand {
                 font-size: 2rem;
@@ -353,9 +353,28 @@
             .splash-divider {
                 max-width: 200px;
             }
+            .splash-footer {
+                bottom: 1.5rem;
+                font-size: 0.65rem;
+            }
+            .splash-footer span {
+                padding: 0 8px;
+            }
+            .splash-footer span::before,
+            .splash-footer span::after {
+                margin: 0 2px;
+            }
+            body::after {
+                font-size: 2rem;
+                top: 5%;
+                right: 8%;
+            }
         }
         
         @media (max-width: 480px) {
+            .splash-container {
+                padding: 1.5rem 1rem;
+            }
             .splash-brand {
                 font-size: 1.6rem;
             }
@@ -369,6 +388,95 @@
             .dot {
                 width: 11px;
                 height: 11px;
+            }
+            .splash-loader {
+                width: 150px;
+            }
+            .splash-logo-wrapper {
+                margin-bottom: 1.8rem;
+            }
+            .splash-divider {
+                margin: 1.5rem auto 2rem;
+                max-width: 160px;
+                gap: 10px;
+            }
+            .splash-divider .key-icon {
+                font-size: 0.9rem;
+            }
+            .splash-footer {
+                bottom: 1rem;
+                font-size: 0.55rem;
+            }
+            .splash-footer span {
+                padding: 0 4px;
+            }
+            .splash-footer span::before,
+            .splash-footer span::after {
+                margin: 0 1px;
+            }
+            body::after {
+                font-size: 1.5rem;
+                top: 3%;
+                right: 5%;
+            }
+        }
+        
+        /* Extra small devices */
+        @media (max-width: 360px) {
+            .splash-brand {
+                font-size: 1.3rem;
+            }
+            .splash-logo img {
+                height: 45px;
+            }
+            .splash-tagline {
+                font-size: 0.7rem;
+            }
+            .dot {
+                width: 9px;
+                height: 9px;
+                gap: 10px;
+            }
+            .dots-container {
+                gap: 10px;
+            }
+            .splash-loader {
+                width: 120px;
+                margin-top: 1.8rem;
+            }
+        }
+        
+        /* Landscape phones */
+        @media (max-height: 600px) and (orientation: landscape) {
+            .splash-container {
+                padding: 1rem;
+            }
+            .splash-logo-wrapper {
+                margin-bottom: 1rem;
+            }
+            .splash-logo img {
+                height: 45px;
+            }
+            .splash-brand {
+                font-size: 1.6rem;
+                margin-top: 0.2rem;
+            }
+            .splash-divider {
+                margin: 0.8rem auto 1.2rem;
+            }
+            .splash-loader {
+                margin-top: 1.2rem;
+                width: 140px;
+            }
+            .splash-footer {
+                bottom: 0.8rem;
+            }
+            .dots-container {
+                gap: 10px;
+            }
+            .dot {
+                width: 10px;
+                height: 10px;
             }
         }
     </style>

@@ -182,9 +182,9 @@ function initChatbot() {
     if (!container) return;
     
     container.innerHTML = `
-        <div class="chatbot-toggle" id="chatToggle">
+        <div class="chatbot-toggle" id="chatToggle" aria-label="Open chat assistant">
             <div class="key-icon-container">
-                <svg class="animated-key" viewBox="0 0 100 100" width="32" height="32">
+                <svg class="animated-key" viewBox="0 0 100 100" width="32" height="32" aria-hidden="true">
                     <defs>
                         <linearGradient id="keyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                             <stop offset="0%" style="stop-color:#92C24A;stop-opacity:1" />
@@ -224,10 +224,10 @@ function initChatbot() {
             </div>
             <span class="chatbot-badge">💬</span>
         </div>
-        <div class="chatbot-window" id="chatWindow">
+        <div class="chatbot-window" id="chatWindow" role="dialog" aria-label="Chat assistant">
             <div class="chatbot-header">
                 <div class="chatbot-header-content">
-                    <div class="header-key-icon">
+                    <div class="header-key-icon" aria-hidden="true">
                         <svg viewBox="0 0 100 100" width="28" height="28">
                             <circle cx="40" cy="35" r="18" fill="none" stroke="#92C24A" stroke-width="5"/>
                             <rect x="36" y="46" width="6" height="24" rx="3" fill="#92C24A"/>
@@ -240,12 +240,12 @@ function initChatbot() {
                         <small class="text-muted">Online · Ready to help</small>
                     </div>
                 </div>
-                <button class="chatbot-close" id="chatClose"><i class="bi bi-x-lg"></i></button>
+                <button class="chatbot-close" id="chatClose" aria-label="Close chat"><i class="bi bi-x-lg"></i></button>
             </div>
             <div class="chatbot-messages" id="chatMessages">
                 <div class="chat-message bot-message">
                     <div class="message-content">
-                        <span class="message-avatar">🔑</span>
+                        <span class="message-avatar" aria-hidden="true">🔑</span>
                         <div class="message-bubble">
                             Hello! I'm the LIVINKEY assistant. How can I help you find your perfect PG?
                         </div>
@@ -260,8 +260,8 @@ function initChatbot() {
                 <button class="quick-btn" data-question="How to book a PG?">📝 Booking process</button>
             </div>
             <div class="chatbot-input-area">
-                <input type="text" class="chatbot-input" id="chatInput" placeholder="Type your message..." />
-                <button class="chatbot-send" id="chatSend"><i class="bi bi-send-fill"></i></button>
+                <input type="text" class="chatbot-input" id="chatInput" placeholder="Type your message..." aria-label="Type your message" />
+                <button class="chatbot-send" id="chatSend" aria-label="Send message"><i class="bi bi-send-fill"></i></button>
             </div>
         </div>
     `;
@@ -316,7 +316,7 @@ function initChatbot() {
         div.className = `chat-message ${sender}-message`;
         div.innerHTML = `
             <div class="message-content">
-                ${sender === 'bot' ? '<span class="message-avatar">🔑</span>' : ''}
+                ${sender === 'bot' ? '<span class="message-avatar" aria-hidden="true">🔑</span>' : ''}
                 <div class="message-bubble">${text}</div>
             </div>
         `;
@@ -330,7 +330,7 @@ function initChatbot() {
         div.className = 'chat-message bot-message typing-indicator';
         div.innerHTML = `
             <div class="message-content">
-                <span class="message-avatar">🔑</span>
+                <span class="message-avatar" aria-hidden="true">🔑</span>
                 <div class="message-bubble typing-bubble">
                     <span class="dot-typing"></span>
                     <span class="dot-typing"></span>
@@ -392,7 +392,7 @@ function initChatbot() {
 }
 
 /* ===================== Function to render PG Cards ===================== */
-function renderPGCards(data, containerId) {
+function renderPGCards(data, containerId, clickable = true) {
     const container = document.getElementById(containerId);
     if (!container) return;
 
@@ -415,7 +415,7 @@ function renderPGCards(data, containerId) {
         col.className = 'col-lg-3 col-md-4 col-sm-6 reveal';
         col.style.transitionDelay = `${Math.min(index, 8) * 0.06}s`;
         col.innerHTML = `
-            <div class="pg-card" data-id="${pg.id}">
+            <div class="pg-card" data-id="${pg.id}" role="button" tabindex="0" aria-label="View details for ${pg.name}">
                 <div class="pg-card-img-wrap">
                     <img src="${pg.images[0] || 'https://placehold.co/600x400/92C24A/FFFFFF?text=No+Image'}" class="pg-card-img" alt="${pg.name}" loading="lazy">
                 </div>
@@ -439,31 +439,62 @@ function renderPGCards(data, containerId) {
         container.appendChild(col);
     });
 
-    document.querySelectorAll('.pg-card').forEach(card => {
-        card.addEventListener('click', function () {
-            const id = parseInt(this.dataset.id);
-            const pg = pgData.find(p => p.id === id);
-            if (pg) openDetailModal(pg);
+    // Only add click handlers if clickable is true
+    if (clickable) {
+        document.querySelectorAll('.pg-card').forEach(card => {
+            card.addEventListener('click', function (e) {
+                const id = parseInt(this.dataset.id);
+                const pg = pgData.find(p => p.id === id);
+                if (pg) openDetailModal(pg);
+            });
+            // Keyboard support for accessibility
+            card.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    const id = parseInt(this.dataset.id);
+                    const pg = pgData.find(p => p.id === id);
+                    if (pg) openDetailModal(pg);
+                }
+            });
         });
-    });
+    }
 
     observeReveals();
 }
 
 /* ===================== Function to open detail modal ===================== */
 function openDetailModal(pg) {
-    document.getElementById('detailPgName').textContent = pg.name;
-    document.getElementById('detailLocation').textContent = pg.location;
-    document.getElementById('detailRent').textContent = pg.rent.toLocaleString('en-IN');
-    document.getElementById('detailRooms').textContent = pg.rooms;
-    document.getElementById('detailAvailable').textContent = pg.available;
+    // Check if we're on a page that has the detail modal elements
+    const detailPgName = document.getElementById('detailPgName');
+    const detailLocation = document.getElementById('detailLocation');
+    const detailRent = document.getElementById('detailRent');
+    const detailRooms = document.getElementById('detailRooms');
+    const detailAvailable = document.getElementById('detailAvailable');
+    const detailAmenities = document.getElementById('detailAmenities');
+    const detailReviews = document.getElementById('detailReviews');
+    const detailCarouselInner = document.getElementById('detailCarouselInner');
+    const pgDetailModal = document.getElementById('pgDetailModal');
+
+    // If modal elements don't exist (home page), redirect to pgs.html
+    if (!detailPgName || !pgDetailModal) {
+        // Redirect to pgs.html with a query parameter to highlight the specific PG
+        window.location.href = `pgs.html?pg=${pg.id}`;
+        return;
+    }
+
+    // If modal exists, populate and show it
+    detailPgName.textContent = pg.name;
+    detailLocation.textContent = pg.location;
+    detailRent.textContent = pg.rent.toLocaleString('en-IN');
+    detailRooms.textContent = pg.rooms;
+    detailAvailable.textContent = pg.available;
 
     const amenityMap = { wifi: 'WiFi', ac: 'AC', security: 'Security', gym: 'Gym' };
     const amenityList = pg.amenities.map(a => amenityMap[a] || a).join(', ');
-    document.getElementById('detailAmenities').textContent = amenityList || 'None specified';
+    detailAmenities.textContent = amenityList || 'None specified';
 
-    const reviewContainer = document.getElementById('detailReviews');
-    reviewContainer.innerHTML = '';
+    // Clear and populate reviews
+    detailReviews.innerHTML = '';
     pg.reviews.forEach(review => {
         const initials = review.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
         const div = document.createElement('div');
@@ -474,19 +505,20 @@ function openDetailModal(pg) {
                 <strong>${review.name}</strong><br>
                 <small>${review.comment}</small>
             </div>`;
-        reviewContainer.appendChild(div);
+        detailReviews.appendChild(div);
     });
 
-    const carouselInner = document.getElementById('detailCarouselInner');
-    carouselInner.innerHTML = '';
+    // Clear and populate carousel
+    detailCarouselInner.innerHTML = '';
     pg.images.forEach((img, index) => {
         const div = document.createElement('div');
         div.className = `carousel-item ${index === 0 ? 'active' : ''}`;
         div.innerHTML = `<img src="${img}" class="d-block w-100" style="height: 350px; object-fit: cover;" alt="${pg.name}">`;
-        carouselInner.appendChild(div);
+        detailCarouselInner.appendChild(div);
     });
 
-    const modal = new bootstrap.Modal(document.getElementById('pgDetailModal'));
+    // Show the modal
+    const modal = new bootstrap.Modal(pgDetailModal);
     modal.show();
 }
 
@@ -579,6 +611,29 @@ function initNavbarScroll() {
     onScroll();
 }
 
+/* ===================== URL Parameter handling for PG highlight ===================== */
+function handlePGParameter() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const pgId = urlParams.get('pg');
+    if (pgId) {
+        const id = parseInt(pgId);
+        const pg = pgData.find(p => p.id === id);
+        if (pg) {
+            // Wait a moment for the page to load, then open the modal
+            setTimeout(() => {
+                // Check if modal exists on this page
+                const modalExists = document.getElementById('pgDetailModal');
+                if (modalExists) {
+                    openDetailModal(pg);
+                } else {
+                    // If we're on the home page and got a pg param, redirect to pgs.html
+                    window.location.href = `pgs.html?pg=${pgId}`;
+                }
+            }, 600);
+        }
+    }
+}
+
 /* ===================== Initialize on page load ===================== */
 document.addEventListener('DOMContentLoaded', function () {
     initNavbarScroll();
@@ -588,12 +643,14 @@ document.addEventListener('DOMContentLoaded', function () {
     ['searchBtn', 'helpFormSubmit'].forEach(id => wrapButtonLabel(document.getElementById(id)));
     document.querySelectorAll('.app-download-tab').forEach(btn => wrapButtonLabel(btn));
 
+    // Top 10 PGs on home page - clickable with redirect
     if (document.getElementById('topPropertiesContainer')) {
-        renderPGCards(pgData.slice(0, 10), 'topPropertiesContainer');
+        renderPGCards(pgData.slice(0, 10), 'topPropertiesContainer', true);
     }
 
+    // All PGs on pgs page - clickable with modal
     if (document.getElementById('pgCardContainer')) {
-        renderPGCards(pgData, 'pgCardContainer');
+        renderPGCards(pgData, 'pgCardContainer', true);
 
         document.getElementById('searchBtn')?.addEventListener('click', filterPGs);
         document.getElementById('searchInput')?.addEventListener('keyup', function (e) {
@@ -603,6 +660,7 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('occupancyFilter')?.addEventListener('change', filterPGs);
     }
 
+    // Help form submission
     document.getElementById('helpForm')?.addEventListener('submit', function (e) {
         e.preventDefault();
         const submitBtn = document.getElementById('helpFormSubmit');
@@ -632,4 +690,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     observeReveals();
     animateCounters();
+
+    // Handle PG parameter for direct linking
+    handlePGParameter();
 });
