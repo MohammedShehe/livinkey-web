@@ -94,7 +94,6 @@ async function fetchAllPGs(filters = {}) {
         return cached;
     }
 
-    // Build query string for filters
     const params = new URLSearchParams();
     if (filters.search) params.append('search', filters.search);
     if (filters.min_rent) params.append('min_rent', filters.min_rent);
@@ -108,7 +107,6 @@ async function fetchAllPGs(filters = {}) {
 
     const result = await apiFetch(endpoint);
 
-    // Only cache unfiltered results
     if (Object.keys(filters).length === 0) {
         setCache(cacheKey, result.data);
     }
@@ -131,10 +129,8 @@ async function fetchPGDetails(pgId) {
 // ============================================================
 
 function extractAmenities(pg) {
-    // Try multiple possible data structures
     let amenities = [];
     
-    // If amenities is an array of objects with amenity_name property
     if (Array.isArray(pg.amenities)) {
         amenities = pg.amenities.map(a => {
             if (typeof a === 'string') return a;
@@ -145,17 +141,14 @@ function extractAmenities(pg) {
         }).filter(a => a && a.length > 0);
     }
     
-    // If amenities is an array of strings (amenity_names)
     if (amenities.length === 0 && Array.isArray(pg.amenity_names)) {
         amenities = pg.amenity_names.filter(a => a && a.length > 0);
     }
     
-    // If amenities is a string (comma-separated)
     if (amenities.length === 0 && typeof pg.amenities === 'string') {
         amenities = pg.amenities.split(',').map(a => a.trim()).filter(a => a.length > 0);
     }
     
-    // If amenities is a string (amenity_names)
     if (amenities.length === 0 && typeof pg.amenity_names === 'string') {
         amenities = pg.amenity_names.split(',').map(a => a.trim()).filter(a => a.length > 0);
     }
@@ -278,7 +271,6 @@ async function openDetailModal(pgIdOrData) {
             pg = await fetchPGDetails(pgIdOrData);
         } catch (error) {
             console.error('Failed to load PG details:', error);
-            // Try to find in cached list
             const cached = getCached('pgs');
             if (cached) {
                 pg = cached.find(p => p.id === pgIdOrData);
@@ -292,14 +284,12 @@ async function openDetailModal(pgIdOrData) {
         pg = pgIdOrData;
     }
 
-    // Check if modal exists on this page
     const modal = document.getElementById('pgDetailModal');
     if (!modal) {
         window.location.href = `pgs.html?pg=${pg.id}`;
         return;
     }
 
-    // Populate modal
     document.getElementById('detailPgName').textContent = pg.name || 'PG Name';
     document.getElementById('detailLocation').textContent = pg.location || 'Location TBD';
     document.getElementById('detailRent').textContent = (pg.rent || 0).toLocaleString('en-IN');
@@ -307,16 +297,12 @@ async function openDetailModal(pgIdOrData) {
     const available = (pg.total_capacity || 0) - (pg.total_occupied || 0);
     document.getElementById('detailAvailable').textContent = available;
 
-    // ============================================================
-    // FIXED: Extract amenities as strings
-    // ============================================================
     const amenitiesList = extractAmenities(pg);
     const amenitiesDisplay = amenitiesList.length > 0 
         ? amenitiesList.join(', ')
         : 'None specified';
     document.getElementById('detailAmenities').textContent = amenitiesDisplay;
 
-    // Reviews
     const reviewsContainer = document.getElementById('detailReviews');
     reviewsContainer.innerHTML = '';
     const reviews = pg.reviews || [];
@@ -341,7 +327,6 @@ async function openDetailModal(pgIdOrData) {
         });
     }
 
-    // Images Carousel
     const images = pg.images || [];
     const carouselInner = document.getElementById('detailCarouselInner');
     carouselInner.innerHTML = '';
@@ -360,7 +345,6 @@ async function openDetailModal(pgIdOrData) {
         });
     }
 
-    // Show modal
     const bsModal = new bootstrap.Modal(modal);
     bsModal.show();
 }
@@ -379,12 +363,10 @@ function buildFiltersFromUI() {
         filters.search = searchInput.value.trim();
     }
 
-    // Map amenity filter to API expected values
     if (amenityFilter && amenityFilter.value !== 'all') {
         filters.amenities = amenityFilter.value;
     }
 
-    // Map occupancy filter to API status values
     if (occupancyFilter && occupancyFilter.value !== 'all') {
         const statusMap = {
             'vacant': 'vacant',
@@ -635,7 +617,6 @@ function initChatbot() {
         </div>
     `;
 
-    // Chatbot state
     let isOpen = false;
     const chatToggle = document.getElementById('chatToggle');
     const chatWindow = document.getElementById('chatWindow');
@@ -776,40 +757,38 @@ function handlePGParameter() {
 // ============================================================
 
 async function initHomePage() {
-    console.log('🏠 Initializing Home Page...');
-
     try {
-        // Load welcome message
         const welcome = await fetchWelcomeMessage();
         const heroTitle = document.querySelector('.hero-section h1');
         if (heroTitle && welcome.total_pgs !== undefined) {
-            const total = welcome.total_pgs || 0;
             heroTitle.innerHTML = `Find Your Perfect <span class="text-highlight">PG</span> in Punjab`;
         }
 
-        // Load stats
         const stats = await fetchPGStats();
-        console.log('📊 Stats loaded:', stats);
+        const totalPGs = stats.total_pgs || 0;
 
-        // Update stat counters
+        const heroCount = document.getElementById('heroPGCount');
+        if (heroCount) {
+            heroCount.textContent = `${totalPGs}+`;
+        }
+
         const statBoxes = document.querySelectorAll('.stat-box h3');
-        if (statBoxes.length >= 2) {
-            const totalPGs = stats.total_pgs || 0;
+        if (statBoxes.length >= 1) {
             statBoxes[0].textContent = `${totalPGs}+`;
             statBoxes[0].dataset.countTo = totalPGs;
         }
 
-        // Load top 10 PGs
         const pgs = await fetchAllPGs();
         const topPGs = pgs.slice(0, 10);
         renderPGCards(topPGs, 'topPropertiesContainer', true);
 
-        // Re-trigger counter animation
         animateCounters();
-
-        console.log('✅ Home page initialized successfully');
     } catch (error) {
-        console.error('❌ Home page initialization error:', error);
+        console.error('Home page initialization error:', error);
+        
+        const heroCount = document.getElementById('heroPGCount');
+        if (heroCount) heroCount.textContent = '50+';
+        
         const topContainer = document.getElementById('topPropertiesContainer');
         if (topContainer) {
             topContainer.innerHTML = `
@@ -823,9 +802,6 @@ async function initHomePage() {
 }
 
 async function initPGsPage() {
-    console.log('📋 Initializing PGs Page...');
-
-    // Setup search handlers
     const searchBtn = document.getElementById('searchBtn');
     const searchInput = document.getElementById('searchInput');
     const amenityFilter = document.getElementById('amenityFilter');
@@ -849,12 +825,9 @@ async function initPGsPage() {
     try {
         const pgs = await fetchAllPGs();
         renderPGCards(pgs, 'pgCardContainer', true);
-        console.log(`✅ Loaded ${pgs.length} PGs`);
-
-        // Handle PG parameter for direct linking
         handlePGParameter();
     } catch (error) {
-        console.error('❌ PGs page initialization error:', error);
+        console.error('PGs page initialization error:', error);
         const container = document.getElementById('pgCardContainer');
         if (container) {
             container.innerHTML = `
@@ -868,21 +841,17 @@ async function initPGsPage() {
 }
 
 async function initAboutPage() {
-    console.log('📖 Initializing About Page...');
-
     try {
         const stats = await fetchPGStats();
+        const totalPGs = stats.total_pgs || 0;
         
-        // Update property count in about page
         const propertyCountEl = document.getElementById('aboutPropertyCount');
         if (propertyCountEl) {
-            const totalPGs = stats.total_pgs || 0;
             propertyCountEl.textContent = `${totalPGs}+ fully-furnished properties with modern amenities across Punjab`;
         }
         
         const statBoxes = document.querySelectorAll('.stat-box h3');
         if (statBoxes.length >= 2) {
-            const totalPGs = stats.total_pgs || 0;
             statBoxes[0].textContent = `${totalPGs}+`;
             statBoxes[0].dataset.countTo = totalPGs;
         }
@@ -901,26 +870,20 @@ async function initAboutPage() {
 // ============================================================
 
 document.addEventListener('DOMContentLoaded', function () {
-    console.log('🔑 LIVINKEY Frontend Initializing...');
-
-    // Common initializations
     initNavbarScroll();
     initChatbot();
     initHelpForm();
 
-    // Wrap button labels
     ['searchBtn', 'helpFormSubmit'].forEach(id => {
         const btn = document.getElementById(id);
         if (btn) wrapButtonLabel(btn);
     });
     document.querySelectorAll('.app-download-tab').forEach(btn => wrapButtonLabel(btn));
 
-    // Add reveal classes
     document.querySelectorAll('section, .about-card, .contact-info, .map-container').forEach(el => {
         if (!el.classList.contains('reveal')) el.classList.add('reveal');
     });
 
-    // Page-specific initialization
     const pageType = window.location.pathname.split('/').pop().split('?')[0] || 'home.html';
 
     if (pageType === 'home.html' || pageType === '') {
@@ -929,17 +892,11 @@ document.addEventListener('DOMContentLoaded', function () {
         initPGsPage();
     } else if (pageType === 'about.html') {
         initAboutPage();
-    } else if (pageType === 'contact.html') {
-        console.log('📞 Contact page (no API needed)');
     }
 
-    // Initial reveal observation
     observeReveals();
-
-    console.log('✅ LIVINKEY Frontend Initialized');
 });
 
-// Expose functions globally for inline usage
 window.filterPGs = filterPGs;
 window.openDetailModal = openDetailModal;
 window.fetchAllPGs = fetchAllPGs;

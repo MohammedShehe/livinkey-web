@@ -1093,15 +1093,6 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
     transform: scale(0.92);
 }
 
-/* ===================== FOOTER ===================== */
-footer {
-    background: var(--paper-alt);
-    border-top: 1px solid var(--line) !important;
-    color: var(--ink-soft) !important;
-    font-weight: 500;
-    letter-spacing: 0.02em;
-}
-
 /* ===================== RESPONSIVE ===================== */
 
 /* Tablets and smaller desktops */
@@ -1406,5 +1397,238 @@ footer {
     .quick-btn {
         font-size: 0.8rem;
         padding: 8px 18px;
+    }
+}
+
+/* ===================================================================
+   LIVINKEY — ENRICHED FOOTER STYLES
+   =================================================================== */
+
+/* Footer Base */
+footer {
+    background: var(--paper-alt);
+    border-top: 1px solid var(--line) !important;
+    color: var(--ink-soft);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    margin-top: 0;
+}
+
+footer h6 {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin-bottom: 1rem;
+}
+
+/* Footer Brand */
+.footer-brand p {
+    line-height: 1.7;
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+}
+
+/* Footer Links */
+.footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-links li {
+    margin-bottom: 8px;
+}
+
+.footer-links a {
+    color: var(--ink-soft);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.25s var(--ease), transform 0.25s var(--ease);
+    display: inline-block;
+    position: relative;
+}
+
+.footer-links a::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 1.5px;
+    background: var(--green);
+    transition: width 0.3s var(--ease);
+}
+
+.footer-links a:hover {
+    color: var(--green-deep);
+    transform: translateX(4px);
+}
+
+.footer-links a:hover::after {
+    width: 100%;
+}
+
+/* Footer Contact */
+.footer-contact {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-contact li {
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+}
+
+.footer-contact li i {
+    width: 20px;
+    font-size: 1.05rem;
+    flex-shrink: 0;
+}
+
+.footer-contact a {
+    color: var(--ink-soft);
+    text-decoration: none;
+    transition: color 0.25s var(--ease);
+}
+
+.footer-contact a:hover {
+    color: var(--green-deep);
+}
+
+/* Social Icons */
+.footer-socials {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.social-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--paper);
+    color: var(--ink-soft);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    text-decoration: none;
+    border: 1.5px solid var(--line);
+    transition: all 0.3s var(--ease);
+}
+
+.social-icon:hover {
+    transform: translateY(-4px);
+    border-color: var(--green);
+    box-shadow: 0 6px 20px rgba(146, 194, 74, 0.2);
+}
+
+.social-icon:hover .bi-instagram {
+    color: #E4405F;
+}
+
+.social-icon:hover .bi-facebook {
+    color: #1877F2;
+}
+
+.social-icon:hover .bi-whatsapp {
+    color: #25D366;
+}
+
+.social-icon:hover .bi-envelope {
+    color: #EA4335;
+}
+
+/* Footer Divider */
+footer hr {
+    opacity: 0.6;
+}
+
+/* Footer Bottom Text */
+footer .text-muted {
+    color: var(--ink-soft) !important;
+    opacity: 0.6;
+    font-size: 0.8rem;
+}
+
+footer .bi-heart-fill {
+    font-size: 0.65rem;
+}
+
+/* Footer Responsive */
+@media (max-width: 768px) {
+    footer .container {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+    
+    footer h6 {
+        margin-top: 0.5rem;
+        font-size: 0.85rem;
+    }
+    
+    .footer-brand p {
+        font-size: 0.8rem;
+    }
+    
+    .footer-socials {
+        gap: 10px;
+    }
+    
+    .social-icon {
+        width: 38px;
+        height: 38px;
+        font-size: 1rem;
+    }
+    
+    .footer-contact li {
+        font-size: 0.85rem;
+    }
+    
+    .footer-links a {
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 576px) {
+    footer .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    footer .row.g-4 {
+        --bs-gutter-y: 1.5rem;
+    }
+    
+    footer h6 {
+        font-size: 0.8rem;
+        margin-bottom: 0.6rem;
+    }
+    
+    .footer-brand img {
+        height: 40px;
+    }
+    
+    .social-icon {
+        width: 34px;
+        height: 34px;
+        font-size: 0.9rem;
+    }
+    
+    .footer-contact li {
+        font-size: 0.8rem;
+        gap: 8px;
+    }
+    
+    .footer-contact li i {
+        width: 18px;
+        font-size: 0.9rem;
     }
 }
