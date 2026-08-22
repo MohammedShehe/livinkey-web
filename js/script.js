@@ -2,9 +2,7 @@
 // LIVINKEY FRONTEND - BACKEND API CONNECTION
 // ============================================================
 
-const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-    ? 'http://localhost:5000/api'
-    : 'https://your-backend-url.com/api'; // UPDATE WITH YOUR PRODUCTION URL
+const API_BASE = 'https://livinkey-backend-e15s.onrender.com/api';
 
 // ============================================================
 // API HELPER FUNCTIONS
