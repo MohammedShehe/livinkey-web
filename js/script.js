@@ -2,7 +2,7 @@
 // LIVINKEY FRONTEND - BACKEND API CONNECTION
 // ============================================================
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = 'https://livinkey-backend-e15s.onrender.com/api';
 
 // ============================================================
 // API HELPER FUNCTIONS
