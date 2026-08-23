@@ -2,7 +2,7 @@
 // LIVINKEY FRONTEND - BACKEND API CONNECTION
 // ============================================================
 
-const API_BASE = 'https://livinkey-backend-e15s.onrender.com/api';
+const API_BASE = 'http://localhost:5000/api';
 
 // ============================================================
 // API HELPER FUNCTIONS
@@ -28,6 +28,7 @@ async function apiFetch(endpoint, options = {}) {
 
         return data;
     } catch (error) {
+        // Keep this for production error tracking
         console.error(`API Fetch Error [${endpoint}]:`, error);
         throw error;
     }
@@ -43,7 +44,7 @@ const CACHE = {
     stats: null,
     welcome: null,
     lastFetch: {},
-    TTL: 60000, // 1 minute cache
+    TTL: 60000,
 };
 
 function isCacheValid(key) {
@@ -72,8 +73,9 @@ async function fetchWelcomeMessage() {
     if (cached) return cached;
 
     const result = await apiFetch('/public/welcome');
-    setCache('welcome', result.data);
-    return result.data;
+    const data = result.data || result;
+    setCache('welcome', data);
+    return data;
 }
 
 async function fetchPGStats() {
@@ -81,8 +83,9 @@ async function fetchPGStats() {
     if (cached) return cached;
 
     const result = await apiFetch('/public/pgs/stats');
-    setCache('stats', result.data);
-    return result.data;
+    const data = result.data || result;
+    setCache('stats', data);
+    return data;
 }
 
 async function fetchAllPGs(filters = {}) {
@@ -104,12 +107,15 @@ async function fetchAllPGs(filters = {}) {
     const endpoint = `/public/pgs${queryString ? '?' + queryString : ''}`;
 
     const result = await apiFetch(endpoint);
+    const data = result.data || result || [];
+
+    const pgsArray = Array.isArray(data) ? data : [];
 
     if (Object.keys(filters).length === 0) {
-        setCache(cacheKey, result.data);
+        setCache(cacheKey, pgsArray);
     }
 
-    return result.data;
+    return pgsArray;
 }
 
 async function fetchPGDetails(pgId) {
@@ -118,8 +124,9 @@ async function fetchPGDetails(pgId) {
     if (cached) return cached;
 
     const result = await apiFetch(`/public/pgs/${pgId}`);
-    setCache(cacheKey, result.data);
-    return result.data;
+    const data = result.data || result;
+    setCache(cacheKey, data);
+    return data;
 }
 
 // ============================================================
@@ -190,7 +197,9 @@ function renderPGCards(pgs, containerId, clickable = true) {
     const container = document.getElementById(containerId);
     if (!container) return;
 
-    if (!pgs || pgs.length === 0) {
+    const pgsArray = Array.isArray(pgs) ? pgs : [];
+
+    if (pgsArray.length === 0) {
         container.innerHTML = `
             <div class="col-12 text-center py-5">
                 <i class="bi bi-house-x fs-1" style="color: var(--line-strong);"></i>
@@ -201,13 +210,13 @@ function renderPGCards(pgs, containerId, clickable = true) {
 
     container.innerHTML = '';
 
-    pgs.forEach((pg, index) => {
+    pgsArray.forEach((pg, index) => {
         const statusText = pg.status_text || 'Vacant';
         const statusClass = getStatusClass(statusText);
 
         const coverImage = pg.cover_image || pg.images?.[0] || 'https://placehold.co/600x400/92C24A/FFFFFF?text=No+Image';
 
-        const rating = pg.overall_rating || 0;
+        const rating = parseFloat(pg.overall_rating) || 0;
         const ratingDisplay = rating > 0 ? rating.toFixed(1) : 'New';
 
         const col = document.createElement('div');
@@ -220,7 +229,7 @@ function renderPGCards(pgs, containerId, clickable = true) {
                 </div>
                 <div class="p-3">
                     <div class="d-flex justify-content-between align-items-start mb-2">
-                        <h5 class="fw-bold mb-0">${pg.name}</h5>
+                        <h5 class="fw-bold mb-0">${pg.name || 'Unnamed PG'}</h5>
                         <span class="rating-badge">${ratingDisplay}</span>
                     </div>
                     <p class="small text-muted mb-2"><i class="bi bi-geo-alt"></i> ${pg.location || 'Location TBD'}</p>
@@ -267,8 +276,7 @@ async function openDetailModal(pgIdOrData) {
     if (typeof pgIdOrData === 'number') {
         try {
             pg = await fetchPGDetails(pgIdOrData);
-        } catch (error) {
-            console.error('Failed to load PG details:', error);
+        } catch {
             const cached = getCached('pgs');
             if (cached) {
                 pg = cached.find(p => p.id === pgIdOrData);
@@ -385,8 +393,7 @@ async function filterPGs() {
         const filters = buildFiltersFromUI();
         const pgs = await fetchAllPGs(filters);
         renderPGCards(pgs, 'pgCardContainer');
-    } catch (error) {
-        console.error('Filter error:', error);
+    } catch {
         const container = document.getElementById('pgCardContainer');
         if (container) {
             container.innerHTML = `
@@ -759,7 +766,7 @@ async function initHomePage() {
         const welcome = await fetchWelcomeMessage();
         const heroTitle = document.querySelector('.hero-section h1');
         if (heroTitle && welcome.total_pgs !== undefined) {
-            heroTitle.innerHTML = `Find Your Perfect <span class="text-highlight">PG</span> in Punjab`;
+            heroTitle.innerHTML = `Find Your Perfect <span class="text-highlight">PG</span> in India`;
         }
 
         const stats = await fetchPGStats();
@@ -770,20 +777,33 @@ async function initHomePage() {
             heroCount.textContent = `${totalPGs}+`;
         }
 
-        const statBoxes = document.querySelectorAll('.stat-box h3');
-        if (statBoxes.length >= 1) {
-            statBoxes[0].textContent = `${totalPGs}+`;
-            statBoxes[0].dataset.countTo = totalPGs;
+        const pgs = await fetchAllPGs();
+        let totalTenants = 0;
+        if (Array.isArray(pgs)) {
+            pgs.forEach(pg => {
+                totalTenants += pg.total_occupied || 0;
+            });
         }
 
-        const pgs = await fetchAllPGs();
-        const topPGs = pgs.slice(0, 10);
+        const statBoxes = document.querySelectorAll('.stat-box h3');
+        if (statBoxes.length >= 2) {
+            statBoxes[0].textContent = `${totalPGs}+`;
+            statBoxes[0].dataset.countTo = totalPGs;
+            const displayCount = totalTenants > 0 ? totalTenants : 0;
+            statBoxes[1].textContent = `${displayCount}+`;
+            statBoxes[1].dataset.countTo = displayCount;
+        }
+
+        const propertyCountEl = document.getElementById('aboutPropertyCount');
+        if (propertyCountEl) {
+            propertyCountEl.textContent = `${totalPGs}+ fully-furnished properties with modern amenities across India`;
+        }
+
+        const topPGs = Array.isArray(pgs) ? pgs.slice(0, 10) : [];
         renderPGCards(topPGs, 'topPropertiesContainer', true);
 
         animateCounters();
-    } catch (error) {
-        console.error('Home page initialization error:', error);
-        
+    } catch {
         const heroCount = document.getElementById('heroPGCount');
         if (heroCount) heroCount.textContent = '50+';
         
@@ -824,8 +844,7 @@ async function initPGsPage() {
         const pgs = await fetchAllPGs();
         renderPGCards(pgs, 'pgCardContainer', true);
         handlePGParameter();
-    } catch (error) {
-        console.error('PGs page initialization error:', error);
+    } catch {
         const container = document.getElementById('pgCardContainer');
         if (container) {
             container.innerHTML = `
@@ -845,20 +864,29 @@ async function initAboutPage() {
         
         const propertyCountEl = document.getElementById('aboutPropertyCount');
         if (propertyCountEl) {
-            propertyCountEl.textContent = `${totalPGs}+ fully-furnished properties with modern amenities across Punjab`;
+            propertyCountEl.textContent = `${totalPGs}+ fully-furnished properties with modern amenities across India`;
+        }
+        
+        const pgs = await fetchAllPGs();
+        let totalTenants = 0;
+        if (Array.isArray(pgs)) {
+            pgs.forEach(pg => {
+                totalTenants += pg.total_occupied || 0;
+            });
         }
         
         const statBoxes = document.querySelectorAll('.stat-box h3');
         if (statBoxes.length >= 2) {
             statBoxes[0].textContent = `${totalPGs}+`;
             statBoxes[0].dataset.countTo = totalPGs;
+            statBoxes[1].textContent = `${totalTenants}+`;
+            statBoxes[1].dataset.countTo = totalTenants;
         }
         animateCounters();
-    } catch (error) {
-        console.error('About page stats error:', error);
+    } catch {
         const propertyCountEl = document.getElementById('aboutPropertyCount');
         if (propertyCountEl) {
-            propertyCountEl.textContent = 'Premium properties across Punjab';
+            propertyCountEl.textContent = 'Premium properties across India';
         }
     }
 }
