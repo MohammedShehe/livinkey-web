@@ -72,6 +72,36 @@
     <!-- CHATBOT -->
     <div id="chatbot-container"></div>
 
+    <!-- FEEDBACK FLOATING BUTTON -->
+    <div id="feedback-container">
+        <div class="feedback-toggle" id="feedbackToggle" aria-label="Give Feedback">
+            <span class="feedback-pulse-ring"></span>
+            <i class="bi bi-star-fill"></i>
+            <span class="feedback-badge">★</span>
+        </div>
+    </div>
+
+    <!-- FEEDBACK MODAL -->
+    <div class="modal fade feedback-modal" id="feedbackModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-star-fill text-success me-2"></i>Share Your Experience</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="feedbackModalBody">
+                    <!-- Content rendered by JavaScript -->
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-success" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2 text-muted">Loading feedback form...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- HERO -->
     <section class="hero-section py-5">
         <div class="container">
@@ -85,10 +115,6 @@
                 <div class="col-lg-6">
                     <div class="hero-image-frame">
                         <img src="https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=800" alt="PG Accommodation" class="img-fluid" style="max-height: 400px; width: 100%; object-fit: cover;" loading="lazy" />
-                        <!-- ============================================================
-                             FIXED: heroPGCount will be updated by JavaScript from API
-                             Initial value 50+ is just a placeholder
-                             ============================================================ -->
                         <div class="hero-tag-badge"><span class="dot"></span><span id="heroPGCount">50+</span> properties, live now</div>
                     </div>
                 </div>

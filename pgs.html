@@ -72,6 +72,36 @@
     <!-- CHATBOT -->
     <div id="chatbot-container"></div>
 
+    <!-- FEEDBACK FLOATING BUTTON -->
+    <div id="feedback-container">
+        <div class="feedback-toggle" id="feedbackToggle" aria-label="Give Feedback">
+            <span class="feedback-pulse-ring"></span>
+            <i class="bi bi-star-fill"></i>
+            <span class="feedback-badge">★</span>
+        </div>
+    </div>
+
+    <!-- FEEDBACK MODAL -->
+    <div class="modal fade feedback-modal" id="feedbackModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-star-fill text-success me-2"></i>Share Your Experience</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="feedbackModalBody">
+                    <!-- Content rendered by JavaScript -->
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-success" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2 text-muted">Loading feedback form...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- MAIN CONTENT -->
     <main class="container py-4">
         <div class="d-flex align-items-center gap-3 mb-4 pb-2 border-bottom border-2">

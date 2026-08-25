@@ -28,7 +28,6 @@ async function apiFetch(endpoint, options = {}) {
 
         return data;
     } catch (error) {
-        // Keep this for production error tracking
         console.error(`API Fetch Error [${endpoint}]:`, error);
         throw error;
     }
@@ -892,6 +891,278 @@ async function initAboutPage() {
 }
 
 // ============================================================
+// FEEDBACK MODAL - FLOATING BUTTON
+// ============================================================
+
+function initFeedbackModal() {
+    const toggle = document.getElementById('feedbackToggle');
+    const modal = document.getElementById('feedbackModal');
+    const modalBody = document.getElementById('feedbackModalBody');
+
+    if (!toggle || !modal || !modalBody) return;
+
+    // Load feedback form content when modal is shown
+    modal.addEventListener('show.bs.modal', function() {
+        // Only load if not already loaded
+        if (modalBody.dataset.loaded === 'true') return;
+        loadFeedbackForm(modalBody);
+    });
+
+    // Click toggle to open modal
+    toggle.addEventListener('click', function() {
+        const bsModal = bootstrap.Modal.getInstance(modal);
+        if (bsModal) {
+            bsModal.show();
+        } else {
+            const newModal = new bootstrap.Modal(modal);
+            newModal.show();
+        }
+    });
+}
+
+async function loadFeedbackForm(container) {
+    try {
+        // Fetch PGs
+        const pgs = await fetchAllPGs();
+        
+        let optionsHtml = '<option value="">Select a PG...</option>';
+        if (Array.isArray(pgs)) {
+            pgs.forEach(pg => {
+                optionsHtml += `<option value="${pg.id}">${pg.name || 'Unnamed PG'} - ₹${(pg.rent || 0).toLocaleString('en-IN')}/month</option>`;
+            });
+        }
+
+        container.innerHTML = `
+            <form id="feedbackFormModal" novalidate>
+                <!-- PG Selector -->
+                <div class="pg-select-wrapper mb-3">
+                    <select id="pgSelectModal" required>
+                        ${optionsHtml}
+                    </select>
+                    <small class="text-muted">Choose the PG you want to rate</small>
+                </div>
+
+                <!-- User Details -->
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="field-group">
+                            <input type="text" id="fullNameModal" placeholder=" " required>
+                            <label for="fullNameModal">Full Name *</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="field-group">
+                            <input type="email" id="emailModal" placeholder=" " required>
+                            <label for="emailModal">Email Address *</label>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="field-group">
+                            <input type="tel" id="phoneModal" placeholder=" " required>
+                            <label for="phoneModal">Phone Number *</label>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-3">
+
+                <!-- Ratings -->
+                <div id="ratingsContainerModal">
+                    ${createRatingSlider('livingRatingModal', 'livingValueModal', 'Living Experience', 'bi-house-fill')}
+                    ${createRatingSlider('maintenanceRatingModal', 'maintenanceValueModal', 'Maintenance Handling', 'bi-tools')}
+                    ${createRatingSlider('communicationRatingModal', 'communicationValueModal', 'Communication', 'bi-chat-dots-fill')}
+                    ${createRatingSlider('amenitiesRatingModal', 'amenitiesValueModal', 'Amenities', 'bi-grid-fill')}
+                    ${createRatingSlider('technologyRatingModal', 'technologyValueModal', 'Technology Handling', 'bi-phone-fill')}
+                </div>
+
+                <!-- Overall Rating -->
+                <div class="overall-rating-box mt-3">
+                    <span class="label">🌟 Overall Rating</span>
+                    <span class="value" id="overallRatingModal">5.0 / 10</span>
+                </div>
+
+                <!-- Comment -->
+                <div class="field-group mt-3">
+                    <textarea id="commentModal" placeholder=" "></textarea>
+                    <label for="commentModal">Additional Comments (Optional)</label>
+                </div>
+
+                <button type="submit" class="btn-submit-feedback mt-3" id="submitBtnModal">
+                    <i class="bi bi-send-fill me-2"></i>Submit Feedback
+                </button>
+            </form>
+            <div id="feedbackSuccessModal" style="display:none;" class="feedback-success-state">
+                <span class="icon">🎉</span>
+                <h4>Thank You!</h4>
+                <p>Your feedback has been submitted successfully. We appreciate your input!</p>
+                <button class="btn btn-primary rounded-pill px-4 mt-2" onclick="closeFeedbackModal()">Close</button>
+            </div>
+        `;
+
+        container.dataset.loaded = 'true';
+
+        // Set up rating sliders
+        document.querySelectorAll('#ratingsContainerModal .rating-slider').forEach(slider => {
+            slider.addEventListener('input', updateRatingsModal);
+        });
+
+        // Set up form submission
+        document.getElementById('feedbackFormModal').addEventListener('submit', handleFeedbackSubmit);
+
+        // Update initial ratings
+        updateRatingsModal();
+
+    } catch (error) {
+        console.error('Failed to load feedback form:', error);
+        container.innerHTML = `
+            <div class="text-center py-4">
+                <i class="bi bi-exclamation-triangle fs-1" style="color: #e74c3c;"></i>
+                <p class="mt-3">Failed to load feedback form. Please try again.</p>
+                <button class="btn btn-primary rounded-pill px-4" onclick="loadFeedbackForm(document.getElementById('feedbackModalBody'))">Retry</button>
+            </div>
+        `;
+    }
+}
+
+function createRatingSlider(id, displayId, label, iconClass) {
+    return `
+        <div class="rating-slider-container">
+            <div class="rating-label">
+                <span class="label"><i class="bi ${iconClass} me-2" style="color: var(--green);"></i>${label}</span>
+                <span class="value" id="${displayId}">5.0</span>
+            </div>
+            <input type="range" class="rating-slider" id="${id}" min="0" max="10" step="0.5" value="5">
+            <div class="rating-scale">
+                <span>Poor</span>
+                <span>Average</span>
+                <span>Excellent</span>
+            </div>
+        </div>
+    `;
+}
+
+function updateRatingsModal() {
+    const ratings = [
+        { id: 'livingRatingModal', display: 'livingValueModal' },
+        { id: 'maintenanceRatingModal', display: 'maintenanceValueModal' },
+        { id: 'communicationRatingModal', display: 'communicationValueModal' },
+        { id: 'amenitiesRatingModal', display: 'amenitiesValueModal' },
+        { id: 'technologyRatingModal', display: 'technologyValueModal' }
+    ];
+
+    let total = 0;
+    let validCount = 0;
+    ratings.forEach(r => {
+        const slider = document.getElementById(r.id);
+        const display = document.getElementById(r.display);
+        if (slider && display) {
+            const value = parseFloat(slider.value);
+            display.textContent = value.toFixed(1);
+            total += value;
+            validCount++;
+        }
+    });
+
+    const overall = validCount > 0 ? total / validCount : 0;
+    const overallEl = document.getElementById('overallRatingModal');
+    if (overallEl) {
+        overallEl.textContent = overall.toFixed(1) + ' / 10';
+    }
+}
+
+function showFeedbackToast(message, type = 'success') {
+    const existing = document.querySelector('.feedback-toast');
+    if (existing) existing.remove();
+
+    const toast = document.createElement('div');
+    toast.className = `feedback-toast ${type}`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s';
+        setTimeout(() => toast.remove(), 300);
+    }, 4000);
+}
+
+async function handleFeedbackSubmit(e) {
+    e.preventDefault();
+
+    const pgSelect = document.getElementById('pgSelectModal');
+    const fullName = document.getElementById('fullNameModal');
+    const email = document.getElementById('emailModal');
+    const phone = document.getElementById('phoneModal');
+
+    // Validate
+    if (!pgSelect.value) {
+        showFeedbackToast('Please select a PG.', 'warning');
+        return;
+    }
+    if (!fullName.value.trim()) {
+        showFeedbackToast('Please enter your full name.', 'warning');
+        return;
+    }
+    if (!email.value.trim() || !email.value.includes('@')) {
+        showFeedbackToast('Please enter a valid email address.', 'warning');
+        return;
+    }
+    if (!phone.value.trim() || phone.value.trim().length < 5) {
+        showFeedbackToast('Please enter a valid phone number.', 'warning');
+        return;
+    }
+
+    const data = {
+        pg_id: parseInt(pgSelect.value),
+        full_name: fullName.value.trim(),
+        email: email.value.trim(),
+        phone: phone.value.trim(),
+        living_experience_rating: parseFloat(document.getElementById('livingRatingModal').value || 5),
+        maintenance_handling_rating: parseFloat(document.getElementById('maintenanceRatingModal').value || 5),
+        communication_rating: parseFloat(document.getElementById('communicationRatingModal').value || 5),
+        amenities_rating: parseFloat(document.getElementById('amenitiesRatingModal').value || 5),
+        technology_handling_rating: parseFloat(document.getElementById('technologyRatingModal').value || 5),
+        comment: document.getElementById('commentModal').value.trim() || null
+    };
+
+    const submitBtn = document.getElementById('submitBtnModal');
+    submitBtn.disabled = true;
+    submitBtn.classList.add('is-loading');
+
+    try {
+        const response = await fetch(`${API_BASE}/feedbacks/public/submit`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            document.getElementById('feedbackFormModal').style.display = 'none';
+            document.getElementById('feedbackSuccessModal').style.display = 'block';
+            showFeedbackToast('Thank you for your feedback! 🎉', 'success');
+        } else {
+            showFeedbackToast(result.message || 'Failed to submit feedback. Please try again.', 'error');
+        }
+    } catch (error) {
+        console.error('Submit error:', error);
+        showFeedbackToast('An error occurred. Please try again.', 'error');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('is-loading');
+    }
+}
+
+function closeFeedbackModal() {
+    const modal = document.getElementById('feedbackModal');
+    if (modal) {
+        const bsModal = bootstrap.Modal.getInstance(modal);
+        if (bsModal) bsModal.hide();
+    }
+}
+
+// ============================================================
 // MAIN INITIALIZATION
 // ============================================================
 
@@ -899,6 +1170,7 @@ document.addEventListener('DOMContentLoaded', function () {
     initNavbarScroll();
     initChatbot();
     initHelpForm();
+    initFeedbackModal();
 
     ['searchBtn', 'helpFormSubmit'].forEach(id => {
         const btn = document.getElementById(id);
@@ -926,3 +1198,5 @@ document.addEventListener('DOMContentLoaded', function () {
 window.filterPGs = filterPGs;
 window.openDetailModal = openDetailModal;
 window.fetchAllPGs = fetchAllPGs;
+window.loadFeedbackForm = loadFeedbackForm;
+window.closeFeedbackModal = closeFeedbackModal;

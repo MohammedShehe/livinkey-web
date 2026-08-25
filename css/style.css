@@ -1632,3 +1632,376 @@ footer .bi-heart-fill {
         font-size: 0.9rem;
     }
 }
+
+/* ===================================================================
+   LIVINKEY — FEEDBACK FLOATING BUTTON & MODAL
+   =================================================================== */
+
+/* Floating Feedback Button */
+#feedback-container {
+    position: fixed;
+    bottom: 110px;
+    right: 30px;
+    z-index: 9998;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.feedback-toggle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--green);
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 8px 32px rgba(146, 194, 74, 0.35);
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), 
+                box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    position: relative;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    font-size: 1.8rem;
+}
+
+.feedback-toggle:hover {
+    transform: scale(1.08) rotate(-8deg);
+    box-shadow: 0 8px 48px rgba(146, 194, 74, 0.5);
+}
+
+.feedback-toggle:active {
+    transform: scale(0.92);
+}
+
+.feedback-pulse-ring {
+    position: absolute;
+    inset: -8px;
+    border-radius: 50%;
+    border: 2px solid rgba(146, 194, 74, 0.2);
+    animation: feedbackPulse 2s ease-in-out infinite;
+}
+
+@keyframes feedbackPulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+    50% {
+        transform: scale(1.25);
+        opacity: 0;
+    }
+}
+
+.feedback-badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    font-size: 0.6rem;
+    background: var(--ink);
+    color: var(--paper);
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(20, 23, 15, 0.2);
+}
+
+/* Feedback Modal */
+.feedback-modal .modal-content {
+    border-radius: var(--radius-lg) !important;
+    border: none;
+    box-shadow: var(--shadow-lg);
+    max-height: 90vh;
+}
+
+.feedback-modal .modal-header {
+    border-bottom: 1px solid var(--line);
+    padding: 20px 28px;
+}
+
+.feedback-modal .modal-header .modal-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+}
+
+.feedback-modal .modal-body {
+    padding: 24px 28px 20px;
+    max-height: calc(90vh - 140px);
+    overflow-y: auto;
+}
+
+.feedback-modal .modal-footer {
+    border-top: 1px solid var(--line);
+    padding: 16px 28px;
+}
+
+/* Feedback form inside modal - reusing existing styles */
+.feedback-modal .rating-slider-container {
+    background: var(--paper-alt);
+    border-radius: var(--radius-sm);
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    border: 1px solid var(--line);
+}
+
+.feedback-modal .rating-slider-container .rating-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.feedback-modal .rating-slider-container .rating-label .label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--ink);
+}
+
+.feedback-modal .rating-slider-container .rating-label .value {
+    font-weight: 700;
+    color: var(--green-deep);
+    font-size: 1rem;
+    min-width: 32px;
+    text-align: right;
+}
+
+.feedback-modal .rating-slider-container input[type="range"] {
+    width: 100%;
+    height: 5px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: var(--line);
+    border-radius: 4px;
+    outline: none;
+}
+
+.feedback-modal .rating-slider-container input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--green);
+    cursor: pointer;
+    border: 2px solid var(--paper);
+    box-shadow: 0 2px 8px rgba(146, 194, 74, 0.3);
+}
+
+.feedback-modal .rating-slider-container input[type="range"]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--green);
+    cursor: pointer;
+    border: 2px solid var(--paper);
+}
+
+.feedback-modal .rating-scale {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.65rem;
+    color: var(--ink-soft);
+    opacity: 0.5;
+    margin-top: 2px;
+}
+
+.feedback-modal .overall-rating-box {
+    background: var(--green-tint);
+    border-radius: var(--radius-sm);
+    padding: 12px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid var(--green);
+}
+
+.feedback-modal .overall-rating-box .label {
+    font-weight: 600;
+    color: var(--ink);
+}
+
+.feedback-modal .overall-rating-box .value {
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: var(--green-deep);
+}
+
+.feedback-modal .pg-select-wrapper select {
+    width: 100%;
+    padding: 11px 16px;
+    border: 1.5px solid var(--line-strong);
+    border-radius: var(--radius-sm);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 0.95rem;
+    background: var(--paper);
+    color: var(--ink);
+    transition: border-color 0.3s, box-shadow 0.3s;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%233A3F32' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    cursor: pointer;
+}
+
+.feedback-modal .pg-select-wrapper select:focus {
+    outline: none;
+    border-color: var(--green-deep);
+    box-shadow: 0 0 0 4px var(--green-tint);
+}
+
+.feedback-modal .btn-submit-feedback {
+    background: var(--green);
+    border: none;
+    color: var(--ink);
+    font-weight: 700;
+    padding: 14px 32px;
+    width: 100%;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+    box-shadow: 0 6px 18px rgba(146, 194, 74, 0.28);
+}
+
+.feedback-modal .btn-submit-feedback:hover {
+    background: var(--green-deep);
+    color: var(--paper);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(146, 194, 74, 0.32);
+}
+
+.feedback-modal .btn-submit-feedback:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.feedback-modal .btn-submit-feedback.is-loading {
+    pointer-events: none;
+    color: transparent !important;
+    position: relative;
+}
+
+.feedback-modal .btn-submit-feedback.is-loading::after {
+    content: "";
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    top: 50%;
+    left: 50%;
+    margin: -11px 0 0 -11px;
+    border-radius: 50%;
+    border: 3px solid rgba(20, 23, 15, 0.25);
+    border-top-color: var(--ink);
+    animation: btn-spin 0.7s linear infinite;
+}
+
+.feedback-modal .feedback-success-state {
+    text-align: center;
+    padding: 30px 10px;
+}
+
+.feedback-modal .feedback-success-state .icon {
+    font-size: 3.5rem;
+    color: var(--green);
+    display: block;
+    margin-bottom: 12px;
+}
+
+.feedback-modal .feedback-success-state h4 {
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.feedback-modal .feedback-success-state p {
+    color: var(--ink-soft);
+}
+
+/* Toast notification */
+.feedback-toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 14px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    z-index: 99999;
+    max-width: 400px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    animation: slideIn 0.3s ease;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.feedback-toast.success {
+    background: var(--green);
+    color: var(--ink);
+}
+
+.feedback-toast.error {
+    background: #e74c3c;
+    color: white;
+}
+
+.feedback-toast.warning {
+    background: #f39c12;
+    color: white;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    #feedback-container {
+        bottom: 100px;
+        right: 16px;
+    }
+    
+    .feedback-toggle {
+        width: 52px;
+        height: 52px;
+        font-size: 1.5rem;
+    }
+    
+    .feedback-modal .modal-body {
+        padding: 16px 18px;
+    }
+    
+    .feedback-modal .modal-header {
+        padding: 14px 18px;
+    }
+    
+    .feedback-modal .modal-footer {
+        padding: 12px 18px;
+    }
+}
+
+@media (max-width: 480px) {
+    #feedback-container {
+        bottom: 90px;
+        right: 12px;
+    }
+    
+    .feedback-toggle {
+        width: 46px;
+        height: 46px;
+        font-size: 1.3rem;
+    }
+    
+    .feedback-pulse-ring {
+        inset: -4px;
+    }
+}
+
+@media (max-width: 360px) {
+    #feedback-container {
+        bottom: 80px;
+        right: 8px;
+    }
+    
+    .feedback-toggle {
+        width: 40px;
+        height: 40px;
+        font-size: 1.1rem;
+    }
+}
