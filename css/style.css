@@ -2290,66 +2290,58 @@ footer .bi-heart-fill {
 }
 .legal-copy a { color: #4f812f; font-weight: 700; }
 
-/* Contact enquiry modal - small, non-blocking side panel */
-.pg-contact-modal {
-    border-radius: 1.6rem;
-    overflow: hidden;
+/* ===================== PG ENQUIRY — MAIN PAGE SECTION ===================== */
+/* The enquiry form is intentionally part of the page flow, directly after
+   resident reviews. It is not a floating/sticky modal. */
+.pg-enquiry-section {
+    background: var(--paper-alt);
+    padding: 90px 0;
 }
 
-/* The wrapping .modal element is still position:fixed/inset:0 so Bootstrap's
-   JS keeps working, but we make it click-through everywhere except the
-   panel itself so it never blocks the rest of the page. */
-.pg-side-modal {
-    background: transparent;
-    pointer-events: none;
+.pg-enquiry-card {
+    max-width: 900px;
+    margin: 0 auto;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 2rem;
+    transition: box-shadow .35s var(--ease), transform .35s var(--ease);
 }
-.pg-side-modal .modal-dialog {
-    pointer-events: auto;
+
+.pg-enquiry-card:hover {
+    box-shadow: var(--shadow-lg);
 }
-.pg-side-modal-dialog {
-    position: fixed;
-    right: 1.25rem;
-    bottom: 1.25rem;
-    left: auto;
-    top: auto;
-    margin: 0;
-    width: 400px;
-    max-width: calc(100vw - 2rem);
-    height: auto !important;
-    max-height: min(78vh, 640px);
-    /* Override Bootstrap's default fade-from-top animation with a slide-in
-       from the side so it reads as a small side widget, not a full modal. */
-    transform: translateY(24px) translateX(24px) scale(.96);
-    transition: transform .38s cubic-bezier(.2, .8, .2, 1), opacity .3s ease;
-    opacity: 0;
+
+.pg-enquiry-header {
+    margin-bottom: 1.25rem;
 }
-.pg-side-modal.show .pg-side-modal-dialog {
-    transform: translateY(0) translateX(0) scale(1);
-    opacity: 1;
+
+.pg-enquiry-header h2 {
+    font-size: clamp(1.7rem, 3vw, 2.3rem);
+    margin-bottom: .35rem;
 }
-.pg-side-modal-dialog .modal-content {
-    max-height: min(78vh, 640px) !important;
-    box-shadow: 0 20px 60px rgba(20, 23, 15, .28), 0 2px 10px rgba(20, 23, 15, .12);
-    border: 1px solid rgba(20, 23, 15, .08);
+
+.pg-enquiry-header p {
+    font-size: .95rem;
 }
-.pg-side-modal-dialog .modal-header,
-.pg-side-modal-dialog .modal-body {
-    padding: 1.15rem 1.35rem !important;
+
+.pg-enquiry-highlight .pg-enquiry-card {
+    box-shadow: 0 0 0 4px rgba(79, 129, 47, .20), var(--shadow-lg);
+    transform: translateY(-3px);
 }
-.pg-side-modal-dialog .modal-header h2 {
-    font-size: 1.15rem;
-}
-.pg-side-modal-dialog .modal-header p {
-    font-size: .82rem;
-}
+
 @media (max-width: 575.98px) {
-    .pg-side-modal-dialog {
-        right: .6rem;
-        bottom: .6rem;
-        width: calc(100vw - 1.2rem);
-        max-height: 72vh;
+    .pg-enquiry-section {
+        padding: 65px 0;
+    }
+
+    .pg-enquiry-card {
+        padding: 1.25rem;
+        border-radius: var(--radius-md);
     }
 }
+
 .contact-pg-summary {
     display: flex;
     align-items: center;

@@ -521,44 +521,34 @@ function renderDetailGallery(pg) {
     });
 }
 
-function openPGContactModal(pg) {
-    const modal=document.getElementById('pgContactModal');
-    if(!modal) return;
-    const name=pg?.name||'Selected PG', location=pg?.location||'Location TBD';
-    const nameEl=document.getElementById('contactPgName'), locEl=document.getElementById('contactPgLocation'), subEl=document.getElementById('contactPgSubtitle');
-    if(nameEl) nameEl.textContent=name;
-    if(locEl) locEl.textContent=location;
-    if(subEl) subEl.textContent=`Tell us what you need at ${name} and we'll help you with the next step.`;
-    const message=document.getElementById('pgContactMessage');
-    if(message && !message.value) message.value=`Hi LIVINKEY, I am interested in ${name}${location ? ` at ${location}`:''}.`;
-    bootstrap.Modal.getOrCreateInstance(modal).show();
+// Fill the in-page enquiry section with the current PG details.
+function fillPGContactPanel(pg) {
+    const panel = document.getElementById('pgContactPanel');
+    if (!panel) return;
+    const name = pg?.name || 'Selected PG';
+    const location = pg?.location || 'Location TBD';
+    const nameEl = document.getElementById('contactPgName');
+    const locEl = document.getElementById('contactPgLocation');
+    const subEl = document.getElementById('contactPgSubtitle');
+    if (nameEl) nameEl.textContent = name;
+    if (locEl) locEl.textContent = location;
+    if (subEl) subEl.textContent = `Tell us what you need at ${name} and we'll help you with the next step.`;
+    const message = document.getElementById('pgContactMessage');
+    if (message && !message.value) {
+        message.value = `Hi LIVINKEY, I am interested in ${name}${location ? ` at ${location}` : ''}.`;
+    }
 }
 
-// Instead of blocking the whole screen the instant the page loads, the PG
-// enquiry panel now slides in from the side once the visitor has actually
-// started reading the page (scrolled a little), and only ever once per visit.
-function autoOpenPGContactOnScroll(pg) {
-    const modalEl = document.getElementById('pgContactModal');
-    if (!modalEl) return;
-    let shown = false;
-    const SCROLL_THRESHOLD = 320; // px scrolled before we offer the panel
-
-    const maybeShow = () => {
-        if (shown) return;
-        if (window.scrollY > SCROLL_THRESHOLD) {
-            shown = true;
-            openPGContactModal(pg);
-            window.removeEventListener('scroll', maybeShow);
-        }
-    };
-    window.addEventListener('scroll', maybeShow, { passive: true });
-    // If the page is short enough that scrolling 320px isn't possible,
-    // fall back to a gentle delayed reveal so the offer still appears.
-    setTimeout(() => {
-        if (shown) return;
-        const canScroll = document.documentElement.scrollHeight - window.innerHeight > SCROLL_THRESHOLD;
-        if (!canScroll) { shown = true; openPGContactModal(pg); window.removeEventListener('scroll', maybeShow); }
-    }, 4000);
+// Scroll / focus the in-page enquiry section (used by the "Contact about this PG" button).
+function openPGContactModal(pg) {
+    fillPGContactPanel(pg);
+    const panel = document.getElementById('pgContactPanel');
+    if (!panel) return;
+    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    panel.classList.add('pg-enquiry-highlight');
+    setTimeout(() => panel.classList.remove('pg-enquiry-highlight'), 1200);
+    const firstInput = document.getElementById('pgContactName');
+    if (firstInput) setTimeout(() => firstInput.focus({ preventScroll: true }), 400);
 }
 
 function initPGContactForm(pg) {
@@ -599,10 +589,10 @@ async function initPGDetailPage() {
         if(wa) wa.href=`https://wa.me/919878383497?text=${encodeURIComponent(`Hi LIVINKEY, I want to enquire about ${pg.name||'this PG'}${pg.location?` in ${pg.location}`:''}.`)}`;
         const contact=document.getElementById('contactPgBtn');
         if(contact) contact.addEventListener('click',()=>openPGContactModal(pg));
+        fillPGContactPanel(pg);
         initPGContactForm(pg);
         if(loading) loading.classList.add('d-none');
         if(content){content.classList.remove('d-none');requestAnimationFrame(()=>content.querySelectorAll('.reveal').forEach(el=>el.classList.add('is-visible')));}
-        autoOpenPGContactOnScroll(pg);
     } catch(err) {
         console.error('PG detail page error:',err);
         if(loading) loading.classList.add('d-none');

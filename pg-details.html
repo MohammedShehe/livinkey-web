@@ -86,6 +86,33 @@
       <div id="detailReviews" class="reviews-grid"></div>
     </section>
 
+<!-- PG ENQUIRY SECTION (part of the main page, after reviews) -->
+<section class="detail-section pg-enquiry-section reveal" id="pgContactPanel" aria-labelledby="pgContactTitle">
+  <div class="pg-enquiry-card">
+    <div class="pg-enquiry-header">
+      <div>
+        <span class="detail-eyebrow">PG enquiry</span>
+        <h2 class="fw-bold" id="pgContactTitle">Let's talk about this PG</h2>
+        <p class="text-muted mb-0" id="contactPgSubtitle">Send us your details and we'll help you with the next step.</p>
+      </div>
+    </div>
+    <form id="pgContactForm">
+      <div class="contact-pg-summary">
+        <div class="contact-pg-icon"><i class="bi bi-house-heart-fill"></i></div>
+        <div><strong id="contactPgName">Selected PG</strong><small id="contactPgLocation">Location</small></div>
+      </div>
+      <div class="row g-3 mt-1">
+        <div class="col-12 col-sm-6"><div class="field-group"><input id="pgContactName" type="text" placeholder=" " required><label for="pgContactName">Full Name *</label></div></div>
+        <div class="col-12 col-sm-6"><div class="field-group"><input id="pgContactPhone" type="tel" placeholder=" " required><label for="pgContactPhone">Phone Number *</label></div></div>
+        <div class="col-12"><div class="field-group"><input id="pgContactEmail" type="email" placeholder=" "><label for="pgContactEmail">Email Address</label></div></div>
+        <div class="col-12"><div class="field-group"><textarea id="pgContactMessage" placeholder=" " rows="3"></textarea><label for="pgContactMessage">Message</label></div></div>
+      </div>
+      <button class="btn btn-primary w-100 rounded-pill py-3 fw-bold mt-3" type="submit" id="pgContactSubmit"><i class="bi bi-send-fill me-2"></i>Send enquiry on WhatsApp</button>
+      <p class="small text-muted text-center mt-2 mb-0">Opens WhatsApp so you can speak directly with LIVINKEY.</p>
+    </form>
+  </div>
+</section>
+
     <section class="detail-section legal-detail-section reveal">
       <div class="detail-section-heading"><span>03</span><div><p class="eyebrow mb-1">Your privacy</p><h2>Privacy Policy</h2></div></div>
       <div class="legal-copy"><div class="section-card">
@@ -284,25 +311,7 @@
   </article>
 </main>
 
-<!-- CONTACT FORM -->
-<div class="modal fade pg-side-modal" id="pgContactModal" tabindex="-1" aria-labelledby="pgContactTitle" aria-hidden="true" data-bs-backdrop="false" data-bs-scroll="true">
- <div class="modal-dialog pg-side-modal-dialog modal-dialog-scrollable"><div class="modal-content pg-contact-modal border-0">
-  <div class="modal-header border-0 p-4 pb-2"><div><span class="detail-eyebrow">PG enquiry</span><h2 class="modal-title fw-bold" id="pgContactTitle">Let's talk about this PG</h2><p class="text-muted mb-0" id="contactPgSubtitle">Send us your details and we'll help you with the next step.</p></div><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-  <div class="modal-body p-4 pt-3">
-   <form id="pgContactForm">
-    <div class="contact-pg-summary"><div class="contact-pg-icon"><i class="bi bi-house-heart-fill"></i></div><div><strong id="contactPgName">Selected PG</strong><small id="contactPgLocation">Location</small></div></div>
-    <div class="row g-3 mt-1">
-      <div class="col-md-6"><div class="field-group"><input id="pgContactName" type="text" placeholder=" " required><label for="pgContactName">Full Name *</label></div></div>
-      <div class="col-md-6"><div class="field-group"><input id="pgContactPhone" type="tel" placeholder=" " required><label for="pgContactPhone">Phone Number *</label></div></div>
-      <div class="col-12"><div class="field-group"><input id="pgContactEmail" type="email" placeholder=" "><label for="pgContactEmail">Email Address</label></div></div>
-      <div class="col-12"><div class="field-group"><textarea id="pgContactMessage" placeholder=" " rows="4"></textarea><label for="pgContactMessage">Message</label></div></div>
-    </div>
-    <button class="btn btn-primary w-100 rounded-pill py-3 fw-bold mt-3" type="submit" id="pgContactSubmit"><i class="bi bi-send-fill me-2"></i>Send enquiry on WhatsApp</button>
-    <p class="small text-muted text-center mt-3 mb-0">Your message will open in WhatsApp so you can speak directly with LIVINKEY.</p>
-   </form>
-  </div>
- </div></div>
-</div>
+
 
 <footer>
  <div class="container py-5"><div class="row g-4">
