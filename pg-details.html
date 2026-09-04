@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" href="assets/black_logo.png" type="image/png" />
+<link rel="apple-touch-icon" href="assets/black_logo.png" />
+<link rel="manifest" href="assets/site.webmanifest" />
+<meta name="theme-color" content="#FBFBF6" />
+<title>LIVINKEY - PG Details</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="pg-detail-page">
+<nav class="navbar navbar-expand-lg sticky-top py-2">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center" href="home.html"><img src="assets/logo.png" alt="LIVINKEY logo" height="56" class="me-2" /></a>
+    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu"><span class="navbar-toggler-icon"></span></button>
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item"><a class="nav-link" href="home.html">Home</a></li>
+        <li class="nav-item"><a class="nav-link active" href="pgs.html">PGs</a></li>
+        <li class="nav-item"><a class="nav-link" href="about.html">About Us</a></li>
+        <li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
+      </ul>
+      <button class="btn btn-download rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#appModal"><i class="bi bi-phone me-1"></i>Download App</button>
+    </div>
+  </div>
+</nav>
+
+<div class="modal fade" id="appModal" tabindex="-1"><div class="modal-dialog modal-sm modal-dialog-centered"><div class="modal-content p-3 border-0 shadow-lg">
+<div class="modal-header border-0 pb-0"><h5 class="modal-title fw-bold">Get the App</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+<div class="modal-body d-flex flex-column gap-3 pt-3 align-items-center">
+<div class="app-download-tab text-center"><div class="qr-frame"><img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://play.google.com/store/apps/details?id=com.livinkey" alt="PlayStore QR" /></div><a href="#" class="btn btn-dark rounded-pill py-2 w-100"><i class="bi bi-google-play me-2"></i>PlayStore</a></div>
+<div class="app-download-tab text-center"><div class="qr-frame"><img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://apps.apple.com/app/livinkey/id123456789" alt="AppStore QR" /></div><a href="#" class="btn btn-dark rounded-pill py-2 w-100"><i class="bi bi-apple me-2"></i>AppStore</a></div>
+</div></div></div></div>
+
+<main class="container py-4 py-lg-5">
+  <a href="pgs.html" class="back-to-pgs"><i class="bi bi-arrow-left"></i> Back to all PGs</a>
+  <div id="pgDetailLoading" class="detail-loading-state">
+    <div class="detail-skeleton hero-skeleton"></div>
+    <div class="detail-skeleton title-skeleton"></div>
+    <div class="detail-skeleton text-skeleton"></div>
+    <div class="detail-skeleton text-skeleton short"></div>
+  </div>
+  <div id="pgDetailError" class="detail-error-state d-none"></div>
+  <article id="pgDetailContent" class="d-none">
+    <section class="pg-detail-hero reveal">
+      <div id="detailCarousel" class="carousel slide pg-detail-carousel" data-bs-ride="carousel">
+        <div class="carousel-inner" id="detailCarouselInner"></div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#detailCarousel" data-bs-slide="prev"><span class="carousel-control-prev-icon"></span><span class="visually-hidden">Previous</span></button>
+        <button class="carousel-control-next" type="button" data-bs-target="#detailCarousel" data-bs-slide="next"><span class="carousel-control-next-icon"></span><span class="visually-hidden">Next</span></button>
+      </div>
+      <div class="pg-detail-intro">
+        <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+          <div><span class="detail-eyebrow">LIVINKEY PG</span><h1 id="detailPgName" class="display-5 fw-bold mb-2">PG Name</h1><p class="detail-location mb-0"><i class="bi bi-geo-alt-fill"></i> <span id="detailLocation">Location</span></p></div>
+          <div class="detail-rating"><span class="rating-star">★</span><strong id="detailRating">New</strong><small>Guest rating</small></div>
+        </div>
+        <div class="detail-stat-grid mt-4">
+          <div><span>Monthly rent</span><strong>₹<span id="detailRent">0</span></strong></div>
+          <div><span>Total rooms</span><strong id="detailRooms">0</strong></div>
+          <div><span>Available beds</span><strong id="detailAvailable">0</strong></div>
+          <div><span>Occupancy</span><strong id="detailStatus">Vacant</strong></div>
+        </div>
+        <div class="detail-actions mt-4">
+          <button class="btn btn-primary rounded-pill px-4 py-3 fw-bold" id="contactPgBtn"><i class="bi bi-chat-dots-fill me-2"></i>Contact about this PG</button>
+          <a id="whatsappPgBtn" href="https://wa.me/919878383497" target="_blank" rel="noopener" class="btn btn-success rounded-pill px-4 py-3 fw-bold"><i class="bi bi-whatsapp me-2"></i>WhatsApp</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="detail-section reveal">
+      <div class="detail-section-heading"><span>01</span><div><p class="eyebrow mb-1">Property overview</p><h2>Everything you need to know</h2></div></div>
+      <div class="row g-4">
+        <div class="col-lg-7"><div class="detail-panel h-100"><h3>What this PG offers</h3><div id="detailAmenities" class="amenity-pills"></div></div></div>
+        <div class="col-lg-5"><div class="detail-panel h-100"><h3>Availability</h3><p id="detailAvailabilityText" class="text-muted mb-0">Checking current availability...</p></div></div>
+      </div>
+    </section>
+
+    <section class="detail-section reveal">
+      <div class="detail-section-heading"><span>02</span><div><p class="eyebrow mb-1">Resident feedback</p><h2>Reviews from our community</h2></div></div>
+      <div id="detailReviews" class="reviews-grid"></div>
+    </section>
+
+    <section class="detail-section legal-detail-section reveal">
+      <div class="detail-section-heading"><span>03</span><div><p class="eyebrow mb-1">Your privacy</p><h2>Privacy Policy</h2></div></div>
+      <div class="legal-copy"><div class="section-card">
+<h1 class="h3 mb-1">Privacy Policy</h1>
+<p class="text-muted-soft mb-4">Last updated: August 2022</p>
+<h2 class="h6">1. Information we collect and store</h2>
+<p class="text-muted-soft">
+      Livinkey collects and stores the following categories of personal data solely to operate PG accommodation services:
+    </p>
+<ul class="text-muted-soft small">
+<li><strong>Tenant &amp; Guest data:</strong> Full name, email, phone number, nationality, gender, residency status (national/international), room assignment, PG assignment, rent amount, security fee, payment dates, arrival date.</li>
+<li><strong>Identity &amp; immigration documents:</strong> Passport, visa, arrival stamp, C-Form, e-FRRO, Aadhaar (tenant and parent), university ID, passport-size photo.</li>
+<li><strong>Payment &amp; billing history:</strong> Rent, electricity, maintenance, other charges, fines, payment proofs, cash payment records, transaction IDs.</li>
+<li><strong>Maintenance requests:</strong> Issue type, description, service date, attached images.</li>
+<li><strong>Feedback &amp; ratings:</strong> Tenant feedback on living experience, maintenance, communication, amenities, technology.</li>
+<li><strong>Admin data:</strong> Name, email, phone, role (super_admin / admin), ID document, permissions, login activity (OTP, reset tokens).</li>
+</ul>
+<h2 class="h6">2. How your data is used</h2>
+<p class="text-muted-soft">
+      All collected data is used strictly for:
+    </p>
+<ul class="text-muted-soft small">
+<li>Managing tenant/guest profiles, room assignments, and billing.</li>
+<li>Generating bills and processing payments (online, cash, partial).</li>
+<li>Handling maintenance requests and support tickets.</li>
+<li>Collecting feedback to improve PG services.</li>
+<li>Authenticating admins via email + OTP and role-based permissions.</li>
+<li>Sending service-related emails (bill notifications, OTPs, password resets, e-FRRO expiry alerts).</li>
+</ul>
+<p class="text-muted-soft">Data is never shared with third parties for marketing or unrelated purposes.</p>
+<h2 class="h6">3. Document storage &amp; retention</h2>
+<p class="text-muted-soft">
+      Uploaded identity and travel documents are stored securely in Cloudinary and are visible only to admins with granted access. Authorized admins can view, download, or delete documents directly from a tenant's profile. Documents are retained as long as the tenant's account is active or as required by applicable law.
+    </p>
+<h2 class="h6">4. Messaging data</h2>
+<p class="text-muted-soft">
+      Conversations between admins and tenants/guests are automatically removed 30 days after being sent. Admins may also delete messages earlier manually. Custom bill messages and QR codes expire after the configured validity period.
+    </p>
+<h2 class="h6">5. Cookies &amp; tracking</h2>
+<p class="text-muted-soft">
+      The Livinkey admin console uses session tokens (JWT) for authentication. No persistent cookies are used for tracking or analytics.
+    </p>
+<h2 class="h6">6. Data security</h2>
+<p class="text-muted-soft">
+      Access to tenant data is protected through:
+    </p>
+<ul class="text-muted-soft small">
+<li>Role-based permissions (view, add, edit, delete per module).</li>
+<li>Two-factor verification (email OTP) for every admin sign-in.</li>
+<li>Secure hashing of passwords and OTPs (bcrypt).</li>
+<li>Encrypted transmission via HTTPS.</li>
+</ul>
+<h2 class="h6">7. Your rights</h2>
+<p class="text-muted-soft">
+      Tenants and guests may request:
+    </p>
+<ul class="text-muted-soft small">
+<li>Access to their personal data stored in the system.</li>
+<li>Correction of inaccurate or incomplete data.</li>
+<li>Deletion of their data (subject to legal and operational retention requirements).</li>
+</ul>
+<p class="text-muted-soft">
+      To exercise these rights, contact your property admin or email <a class="text-green" href="mailto:livinkey@gmail.com">livinkey@gmail.com</a>.
+    </p>
+<h2 class="h6">8. Changes to this policy</h2>
+<p class="text-muted-soft mb-0">
+      This privacy policy may be updated periodically. Continued use of the Livinkey platform after an update constitutes acceptance of the revised policy. Significant changes will be communicated via email or in-app notification.
+    </p>
+</div></div>
+    </section>
+
+    <section class="detail-section legal-detail-section reveal">
+      <div class="detail-section-heading"><span>04</span><div><p class="eyebrow mb-1">Your agreement</p><h2>Terms &amp; Conditions</h2></div></div>
+      <div class="legal-copy"><div class="section-card">
+<h1 class="h3 mb-1">Terms of Service</h1>
+<p class="text-muted-soft mb-4">Last updated: August 2022</p>
+<h2 class="h6">1. Acceptance of terms</h2>
+<p class="text-muted-soft">
+      By using the Livinkey admin console, mobile apps (Tenant, Guest), and associated services, you agree to be bound by these Terms of Service. If you do not agree, please refrain from using the platform.
+    </p>
+<h2 class="h6">2. Description of service</h2>
+<p class="text-muted-soft">
+      Livinkey provides a comprehensive PG management platform that includes:
+    </p>
+<ul class="text-muted-soft small">
+<li><strong>Admin Console:</strong> Manage tenants, guests, PGs, rooms, bills, payments, maintenance, documents, feedback, and notifications.</li>
+<li><strong>Tenant App:</strong> View rent status, pay bills, submit maintenance requests, upload documents, give feedback, view notifications.</li>
+<li><strong>Guest App:</strong> Browse PGs, view ratings, search, and contact property admins.</li>
+</ul>
+<h2 class="h6">3. Admin account responsibility</h2>
+<p class="text-muted-soft">
+      Each admin is responsible for:
+    </p>
+<ul class="text-muted-soft small">
+<li>Keeping login credentials (email and password) confidential.</li>
+<li>All actions performed under their account, including changes to tenant, guest, billing, document, and messaging records.</li>
+<li>Immediately notifying Livinkey of any unauthorized use or security breach.</li>
+</ul>
+<h2 class="h6">4. Permitted use &amp; permissions</h2>
+<p class="text-muted-soft">
+      Access to each management module (tenants, guests, bills, PGs, maintenance, documents, feedback) is granted individually by a Super Admin. Permissions include:
+    </p>
+<ul class="text-muted-soft small">
+<li><strong>View:</strong> Read-only access to records.</li>
+<li><strong>Add:</strong> Create new records.</li>
+<li><strong>Edit:</strong> Modify existing records.</li>
+<li><strong>Delete:</strong> Remove records (subject to audit and retention policies).</li>
+</ul>
+<p class="text-muted-soft">
+      Permissions may be changed or revoked at any time without prior notice.
+    </p>
+<h2 class="h6">5. Data handling &amp; confidentiality</h2>
+<p class="text-muted-soft">
+      Admins may only view or process tenant/guest data (identity documents, payment records, contact details, etc.) as required to operate the property. You must not:
+    </p>
+<ul class="text-muted-soft small">
+<li>Export or share personal data outside approved channels.</li>
+<li>Use data for any purpose other than providing Livinkey services.</li>
+<li>Store or process data insecurely.</li>
+</ul>
+<h2 class="h6">6. Tenant &amp; guest obligations</h2>
+<p class="text-muted-soft">
+      Tenants and guests agree to:
+    </p>
+<ul class="text-muted-soft small">
+<li>Provide accurate and complete information during registration.</li>
+<li>Upload valid and authentic documents (passport, visa, Aadhaar, etc.).</li>
+<li>Make timely payments as per bills generated.</li>
+<li>Submit maintenance requests with accurate descriptions.</li>
+<li>Provide honest feedback to help improve services.</li>
+</ul>
+<p class="text-muted-soft">
+      Failure to comply may result in suspension or termination of access.
+    </p>
+<h2 class="h6">7. Billing &amp; payments</h2>
+<p class="text-muted-soft">
+      Bills are generated monthly and include rent, electricity, maintenance, and other charges. Payment methods include:
+    </p>
+<ul class="text-muted-soft small">
+<li><strong>Online:</strong> UPI QR code, payment links, partial payments.</li>
+<li><strong>Cash:</strong> Verified by admin with OTP confirmation.</li>
+</ul>
+<p class="text-muted-soft">
+      Late fees (₹100/day) apply after the 7-day grace period. Fines are automatically calculated and notified via email.
+    </p>
+<h2 class="h6">8. Document submission</h2>
+<p class="text-muted-soft">
+      Tenants must upload required documents based on their residency:
+    </p>
+<ul class="text-muted-soft small">
+<li><strong>International:</strong> Passport, visa, arrival stamp, C-Form, e-FRRO, passport-size photo, university ID.</li>
+<li><strong>National:</strong> Passport-size photo, tenant Aadhaar, parent Aadhaar, university ID.</li>
+</ul>
+<p class="text-muted-soft">
+      Documents are verified by admins. Failure to upload valid documents may affect accommodation.
+    </p>
+<h2 class="h6">9. e-FRRO monitoring</h2>
+<p class="text-muted-soft">
+      For international tenants, e-FRRO expiry dates are tracked. Automated email notifications are sent at 7, 14, and 30 days before expiry. Tenants must renew their e-FRRO on time to avoid legal issues.
+    </p>
+<h2 class="h6">10. Maintenance requests</h2>
+<p class="text-muted-soft">
+      Tenants can submit maintenance requests (Plumber, Electrician, Carpenter, RO, AC, WiFi, Cleaning, C-Form, Check-out, Others). Requests are processed by admins and updated through pending → in-progress → completed statuses.
+    </p>
+<h2 class="h6">11. Feedback &amp; ratings</h2>
+<p class="text-muted-soft">
+      Tenants may submit feedback once per stay, rating (1–10) categories such as living experience, maintenance, communication, amenities, and technology. Feedback is used to improve PG services and is visible to admins.
+    </p>
+<h2 class="h6">12. Intellectual property</h2>
+<p class="text-muted-soft">
+      All content, logos, and software used in the Livinkey platform are the property of Livinkey. You may not copy, modify, or distribute any part of the platform without explicit written permission.
+    </p>
+<h2 class="h6">13. Termination &amp; suspension</h2>
+<p class="text-muted-soft">
+      Livinkey reserves the right to suspend or terminate any account (Admin, Tenant, Guest) if:
+    </p>
+<ul class="text-muted-soft small">
+<li>Terms are violated.</li>
+<li>Fraudulent or illegal activity is suspected.</li>
+<li>Payment is overdue beyond the allowed grace period.</li>
+</ul>
+<h2 class="h6">14. Disclaimer of warranties</h2>
+<p class="text-muted-soft">
+      The Livinkey platform is provided "as is" without warranties of any kind. We do not guarantee that the service will be uninterrupted, error-free, or secure from unauthorized access.
+    </p>
+<h2 class="h6">15. Limitation of liability</h2>
+<p class="text-muted-soft">
+      To the fullest extent permitted by law, Livinkey shall not be liable for any indirect, incidental, or consequential damages arising from the use of the platform.
+    </p>
+<h2 class="h6">16. Changes to these terms</h2>
+<p class="text-muted-soft mb-0">
+      Livinkey may update these terms periodically. Continued use after changes constitutes acceptance. Significant changes will be communicated via email or in-app notification.
+    </p>
+</div></div>
+    </section>
+  </article>
+</main>
+
+<!-- CONTACT FORM -->
+<div class="modal fade pg-side-modal" id="pgContactModal" tabindex="-1" aria-labelledby="pgContactTitle" aria-hidden="true" data-bs-backdrop="false" data-bs-scroll="true">
+ <div class="modal-dialog pg-side-modal-dialog modal-dialog-scrollable"><div class="modal-content pg-contact-modal border-0">
+  <div class="modal-header border-0 p-4 pb-2"><div><span class="detail-eyebrow">PG enquiry</span><h2 class="modal-title fw-bold" id="pgContactTitle">Let's talk about this PG</h2><p class="text-muted mb-0" id="contactPgSubtitle">Send us your details and we'll help you with the next step.</p></div><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+  <div class="modal-body p-4 pt-3">
+   <form id="pgContactForm">
+    <div class="contact-pg-summary"><div class="contact-pg-icon"><i class="bi bi-house-heart-fill"></i></div><div><strong id="contactPgName">Selected PG</strong><small id="contactPgLocation">Location</small></div></div>
+    <div class="row g-3 mt-1">
+      <div class="col-md-6"><div class="field-group"><input id="pgContactName" type="text" placeholder=" " required><label for="pgContactName">Full Name *</label></div></div>
+      <div class="col-md-6"><div class="field-group"><input id="pgContactPhone" type="tel" placeholder=" " required><label for="pgContactPhone">Phone Number *</label></div></div>
+      <div class="col-12"><div class="field-group"><input id="pgContactEmail" type="email" placeholder=" "><label for="pgContactEmail">Email Address</label></div></div>
+      <div class="col-12"><div class="field-group"><textarea id="pgContactMessage" placeholder=" " rows="4"></textarea><label for="pgContactMessage">Message</label></div></div>
+    </div>
+    <button class="btn btn-primary w-100 rounded-pill py-3 fw-bold mt-3" type="submit" id="pgContactSubmit"><i class="bi bi-send-fill me-2"></i>Send enquiry on WhatsApp</button>
+    <p class="small text-muted text-center mt-3 mb-0">Your message will open in WhatsApp so you can speak directly with LIVINKEY.</p>
+   </form>
+  </div>
+ </div></div>
+</div>
+
+<footer>
+ <div class="container py-5"><div class="row g-4">
+  <div class="col-lg-4 col-md-6"><div class="footer-brand"><img src="assets/logo.png" alt="LIVINKEY" height="52" class="mb-3" /><p class="text-muted small" style="max-width:280px;">LIVINKEY is a premier PG management company, providing comfortable, secure, and affordable accommodation for students and working professionals.</p><div class="footer-socials mt-3"><a href="https://www.instagram.com/livinkey?igsh=MTc0eWdyeTNvcmFtZA==" target="_blank" rel="noopener" class="social-icon"><i class="bi bi-instagram"></i></a><a href="https://www.facebook.com/livin.key.9/" target="_blank" rel="noopener" class="social-icon"><i class="bi bi-facebook"></i></a><a href="https://wa.me/919878383497" target="_blank" rel="noopener" class="social-icon"><i class="bi bi-whatsapp"></i></a><a href="mailto:livinkey@gmail.com" class="social-icon"><i class="bi bi-envelope"></i></a></div></div></div>
+  <div class="col-lg-2 col-md-6"><h6 class="fw-bold mb-3">Quick Links</h6><ul class="list-unstyled footer-links"><li><a href="home.html">Home</a></li><li><a href="pgs.html">PGs</a></li><li><a href="about.html">About Us</a></li><li><a href="contact.html">Contact</a></li></ul></div>
+  <div class="col-lg-3 col-md-6"><h6 class="fw-bold mb-3">Contact Us</h6><ul class="list-unstyled footer-contact"><li><i class="bi bi-whatsapp text-success"></i> <a href="https://wa.me/919878383497">+91 98783 83497</a></li><li><i class="bi bi-envelope text-danger"></i> <a href="mailto:livinkey@gmail.com">livinkey@gmail.com</a></li><li><i class="bi bi-instagram text-danger"></i> <a href="https://www.instagram.com/livinkey?igsh=MTc0eWdyeTNvcmFtZA==" target="_blank">@livinkey</a></li><li><i class="bi bi-facebook text-primary"></i> <a href="https://www.facebook.com/livin.key.9/" target="_blank">LIVINKEY</a></li></ul></div>
+  <div class="col-lg-3 col-md-6"><h6 class="fw-bold mb-3">Legal</h6><ul class="list-unstyled footer-links"><li><a href="terms.html">Terms &amp; Conditions</a></li><li><a href="privacy.html">Privacy Policy</a></li><li><a href="contact.html">Support</a></li></ul></div>
+ </div><hr class="my-4" style="border-color:rgba(20,23,15,.08);" /><div class="row align-items-center"><div class="col-md-6 text-md-start text-center"><small class="text-muted">&copy; 2022 LIVINKEY. All rights reserved. Premium PG Management, India</small></div><div class="col-md-6 text-md-end text-center mt-2 mt-md-0"><small class="text-muted">A Complete Home <i class="bi bi-heart-fill text-danger" style="font-size:.6rem;"></i></small></div></div></div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/script.js"></script>
+</body>
+</html>

@@ -219,7 +219,7 @@ function renderPGCards(pgs, containerId, clickable = true) {
         const ratingDisplay = rating > 0 ? rating.toFixed(1) : 'New';
 
         const col = document.createElement('div');
-        col.className = 'col-lg-3 col-md-4 col-sm-6 reveal';
+        col.className = 'pg-card-col reveal';
         col.style.transitionDelay = `${Math.min(index, 8) * 0.06}s`;
         col.innerHTML = `
             <div class="pg-card" data-id="${pg.id}" role="button" tabindex="0" aria-label="View details for ${pg.name}">
@@ -270,91 +270,346 @@ function renderPGCards(pgs, containerId, clickable = true) {
 // ============================================================
 
 async function openDetailModal(pgIdOrData) {
-    let pg;
-
-    if (typeof pgIdOrData === 'number') {
-        try {
-            pg = await fetchPGDetails(pgIdOrData);
-        } catch {
-            const cached = getCached('pgs');
-            if (cached) {
-                pg = cached.find(p => p.id === pgIdOrData);
-            }
-            if (!pg) {
-                alert('Failed to load PG details. Please try again.');
-                return;
-            }
-        }
-    } else {
-        pg = pgIdOrData;
-    }
-
-    const modal = document.getElementById('pgDetailModal');
-    if (!modal) {
-        window.location.href = `pgs.html?pg=${pg.id}`;
-        return;
-    }
-
-    document.getElementById('detailPgName').textContent = pg.name || 'PG Name';
-    document.getElementById('detailLocation').textContent = pg.location || 'Location TBD';
-    document.getElementById('detailRent').textContent = (pg.rent || 0).toLocaleString('en-IN');
-    document.getElementById('detailRooms').textContent = pg.total_rooms || 0;
-    const available = (pg.total_capacity || 0) - (pg.total_occupied || 0);
-    document.getElementById('detailAvailable').textContent = available;
-
-    const amenitiesList = extractAmenities(pg);
-    const amenitiesDisplay = amenitiesList.length > 0 
-        ? amenitiesList.join(', ')
-        : 'None specified';
-    document.getElementById('detailAmenities').textContent = amenitiesDisplay;
-
-    const reviewsContainer = document.getElementById('detailReviews');
-    reviewsContainer.innerHTML = '';
-    const reviews = pg.reviews || [];
-    if (reviews.length === 0) {
-        reviewsContainer.innerHTML = '<p class="text-muted small">No reviews yet. Be the first to review!</p>';
-    } else {
-        reviews.forEach(review => {
-            const name = review.name || review.tenant_name || 'Anonymous';
-            const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
-            const div = document.createElement('div');
-            div.className = 'review-card';
-            div.innerHTML = `
-                <div class="review-avatar">${initials}</div>
-                <div>
-                    <strong>${name}</strong>
-                    ${review.rating ? `<span class="text-success ms-1">★ ${review.rating}</span>` : ''}
-                    <br>
-                    <small>${review.comment || 'No comment provided.'}</small>
-                </div>
-            `;
-            reviewsContainer.appendChild(div);
-        });
-    }
-
-    const images = pg.images || [];
-    const carouselInner = document.getElementById('detailCarouselInner');
-    carouselInner.innerHTML = '';
-
-    if (images.length === 0) {
-        carouselInner.innerHTML = `
-            <div class="carousel-item active">
-                <img src="https://placehold.co/800x400/92C24A/FFFFFF?text=No+Images" class="d-block w-100" style="height: 350px; object-fit: cover;" alt="No images">
-            </div>`;
-    } else {
-        images.forEach((img, index) => {
-            const div = document.createElement('div');
-            div.className = `carousel-item ${index === 0 ? 'active' : ''}`;
-            div.innerHTML = `<img src="${img}" class="d-block w-100" style="height: 350px; object-fit: cover;" alt="${pg.name}" onerror="this.src='https://placehold.co/800x400/92C24A/FFFFFF?text=Image+Not+Found'">`;
-            carouselInner.appendChild(div);
-        });
-    }
-
-    const bsModal = new bootstrap.Modal(modal);
-    bsModal.show();
+    const pgId = typeof pgIdOrData === 'object' ? pgIdOrData?.id : pgIdOrData;
+    if (!pgId) return;
+    showPageLoading('Opening PG details...');
+    window.location.href = `pg-details.html?pg=${encodeURIComponent(pgId)}`;
 }
 
-// ============================================================
+// Smooth, slow, eased horizontal scroll (native `behavior:'smooth'` is too
+// fast/short for an auto-playing slider, so we drive it ourselves).
+function slowScrollTo(el, target, duration = 1400) {
+    const start = el.scrollLeft;
+    const distance = target - start;
+    if (Math.abs(distance) < 1) return;
+    // Temporarily disable CSS scroll-snap + smooth behavior so our rAF
+    // animation isn't fighting the browser's native scroll handling.
+    const prevSnap = el.style.scrollSnapType;
+    const prevBehavior = el.style.scrollBehavior;
+    el.style.scrollSnapType = 'none';
+    el.style.scrollBehavior = 'auto';
+    const startTime = performance.now();
+    const ease = t => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2); // easeInOutQuad
+    if (el._slideRAF) cancelAnimationFrame(el._slideRAF);
+    const step = (now) => {
+        const progress = Math.min((now - startTime) / duration, 1);
+        el.scrollLeft = start + distance * ease(progress);
+        if (progress < 1) {
+            el._slideRAF = requestAnimationFrame(step);
+        } else {
+            el._slideRAF = null;
+            el.style.scrollSnapType = prevSnap || '';
+            el.style.scrollBehavior = prevBehavior || '';
+        }
+    };
+    el._slideRAF = requestAnimationFrame(step);
+}
+
+function initPGSlider(containerId = 'pgCardContainer', viewportId = 'pgSliderViewport', prevId = 'pgSliderPrev', nextId = 'pgSliderNext') {
+    const viewport = document.getElementById(viewportId);
+    const track = document.getElementById(containerId);
+    const prev = document.getElementById(prevId);
+    const next = document.getElementById(nextId);
+    if (!viewport || !track || !prev || !next) return;
+
+    // Tear down any previous instance on this viewport so filters / re-inits
+    // don't leave orphaned intervals or duplicate listeners.
+    if (viewport._pgSliderCleanup) {
+        viewport._pgSliderCleanup();
+        viewport._pgSliderCleanup = null;
+    }
+
+    const AUTOPLAY_PAUSE_MS = 4200;   // dwell time on each slide before advancing
+    const AUTOPLAY_SCROLL_MS = 1600;  // how long the glide itself takes ("slowly")
+    const RESUME_DELAY_MS = 3500;     // wait this long after user interaction before resuming
+    let autoplayTimer = null;
+    let resumeTimer = null;
+    let layoutRetryTimer = null;
+    let destroyed = false;
+
+    const prefersReducedMotion = () =>
+        window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const getMax = () => Math.max(0, track.scrollWidth - viewport.clientWidth - 2);
+
+    const update = () => {
+        if (destroyed) return;
+        const max = getMax();
+        const current = viewport.scrollLeft;
+        const canSlide = max > 2;
+        prev.disabled = current <= 2;
+        next.disabled = current >= max - 2;
+        prev.classList.toggle('d-none', !canSlide);
+        next.classList.toggle('d-none', !canSlide);
+    };
+
+    const getStep = () => {
+        const card = track.querySelector('.pg-card-col');
+        // gap is 1.5rem (24px) on desktop; match that for consistent steps
+        const gap = 24;
+        return card ? card.getBoundingClientRect().width + gap : Math.max(280, viewport.clientWidth * 0.8);
+    };
+
+    const stopAutoplay = () => {
+        if (autoplayTimer) {
+            clearInterval(autoplayTimer);
+            autoplayTimer = null;
+        }
+    };
+
+    const scheduleResume = () => {
+        if (destroyed) return;
+        if (resumeTimer) clearTimeout(resumeTimer);
+        resumeTimer = setTimeout(startAutoplay, RESUME_DELAY_MS);
+    };
+
+    const advance = () => {
+        if (destroyed || document.hidden) return;
+        const max = getMax();
+        if (max <= 2) return;
+        const current = viewport.scrollLeft;
+        if (current >= max - 4) {
+            // Reached the end — loop back to the beginning.
+            slowScrollTo(viewport, 0, AUTOPLAY_SCROLL_MS);
+        } else {
+            slowScrollTo(viewport, Math.min(current + getStep(), max), AUTOPLAY_SCROLL_MS);
+        }
+    };
+
+    function startAutoplay() {
+        if (destroyed) return;
+        stopAutoplay();
+        if (prefersReducedMotion()) return;
+        if (getMax() <= 2) return; // not enough overflow yet
+        autoplayTimer = setInterval(advance, AUTOPLAY_PAUSE_MS);
+    }
+
+    const pauseAndResumeLater = () => {
+        stopAutoplay();
+        scheduleResume();
+    };
+
+    const onPrev = () => {
+        pauseAndResumeLater();
+        slowScrollTo(viewport, Math.max(viewport.scrollLeft - getStep(), 0), 700);
+    };
+    const onNext = () => {
+        pauseAndResumeLater();
+        slowScrollTo(viewport, Math.min(viewport.scrollLeft + getStep(), getMax()), 700);
+    };
+    const onScroll = () => update();
+    const onResize = () => {
+        update();
+        startAutoplay();
+    };
+    const onVisibility = () => {
+        if (document.hidden) stopAutoplay();
+        else startAutoplay();
+    };
+
+    prev.addEventListener('click', onPrev);
+    next.addEventListener('click', onNext);
+
+    // Pause while the user is actively browsing the slider, resume shortly after.
+    const pauseEvents = ['mouseenter', 'touchstart', 'focusin', 'pointerdown'];
+    const resumeEvents = ['mouseleave', 'touchend'];
+    pauseEvents.forEach(evt => viewport.addEventListener(evt, pauseAndResumeLater, { passive: true }));
+    resumeEvents.forEach(evt => viewport.addEventListener(evt, scheduleResume, { passive: true }));
+
+    viewport.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onResize);
+    document.addEventListener('visibilitychange', onVisibility);
+
+    // ResizeObserver: cards / images can change track width after initial paint.
+    let ro = null;
+    if (typeof ResizeObserver !== 'undefined') {
+        ro = new ResizeObserver(() => {
+            update();
+            // If autoplay never started because layout wasn't ready, try again.
+            if (!autoplayTimer && !destroyed) startAutoplay();
+        });
+        ro.observe(track);
+        ro.observe(viewport);
+    }
+
+    viewport._pgSliderCleanup = () => {
+        destroyed = true;
+        stopAutoplay();
+        if (resumeTimer) clearTimeout(resumeTimer);
+        if (layoutRetryTimer) clearTimeout(layoutRetryTimer);
+        prev.removeEventListener('click', onPrev);
+        next.removeEventListener('click', onNext);
+        pauseEvents.forEach(evt => viewport.removeEventListener(evt, pauseAndResumeLater));
+        resumeEvents.forEach(evt => viewport.removeEventListener(evt, scheduleResume));
+        viewport.removeEventListener('scroll', onScroll);
+        window.removeEventListener('resize', onResize);
+        document.removeEventListener('visibilitychange', onVisibility);
+        if (ro) ro.disconnect();
+        if (viewport._slideRAF) {
+            cancelAnimationFrame(viewport._slideRAF);
+            viewport._slideRAF = null;
+        }
+    };
+
+    // Layout may not be final right after innerHTML replacement (images, fonts,
+    // reveal transforms). Defer the first start so scrollWidth is accurate.
+    update();
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            update();
+            startAutoplay();
+            // One more retry shortly after in case images are still loading.
+            layoutRetryTimer = setTimeout(() => {
+                update();
+                if (!autoplayTimer) startAutoplay();
+            }, 600);
+        });
+    });
+}
+
+function renderDetailReviews(reviews) {
+    const container = document.getElementById('detailReviews');
+    if (!container) return;
+    container.innerHTML = '';
+    if (!Array.isArray(reviews) || !reviews.length) {
+        container.innerHTML = `<div class="empty-detail-card"><i class="bi bi-chat-square-heart"></i><h5>No reviews yet</h5><p>Be one of the first residents to share your experience.</p></div>`;
+        return;
+    }
+    reviews.forEach(review => {
+        const name = review.name || review.tenant_name || 'Anonymous';
+        const initials = name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+        const card = document.createElement('div');
+        card.className = 'review-card detail-review-card';
+        card.innerHTML = `<div class="review-avatar">${initials}</div><div><div class="d-flex flex-wrap gap-2 align-items-center"><strong>${name}</strong>${review.rating ? `<span class="text-success">★ ${review.rating}</span>` : ''}</div><small class="text-muted">${review.comment || 'No comment provided.'}</small></div>`;
+        container.appendChild(card);
+    });
+}
+
+function renderDetailAmenities(amenities) {
+    const container = document.getElementById('detailAmenities');
+    if (!container) return;
+    container.innerHTML = '';
+    if (!amenities.length) {
+        container.innerHTML = '<span class="amenity-pill muted">No amenities specified</span>';
+        return;
+    }
+    const icons = {wifi:'bi-wifi', ac:'bi-snow', security:'bi-shield-check', gym:'bi-heart-pulse', parking:'bi-p-square', kitchen:'bi-cup-hot', laundry:'bi-water'};
+    amenities.forEach(item => {
+        const text = String(item), key = text.toLowerCase();
+        const iconKey = Object.keys(icons).find(k => key.includes(k));
+        const pill = document.createElement('span');
+        pill.className = 'amenity-pill';
+        pill.innerHTML = `<i class="bi ${iconKey ? icons[iconKey] : 'bi-check2-circle'}"></i>${text}`;
+        container.appendChild(pill);
+    });
+}
+
+function renderDetailGallery(pg) {
+    const carouselInner = document.getElementById('detailCarouselInner');
+    if (!carouselInner) return;
+    const images = Array.isArray(pg.images) ? pg.images : [];
+    carouselInner.innerHTML = '';
+    if (!images.length) {
+        carouselInner.innerHTML = `<div class="carousel-item active"><img src="https://placehold.co/1200x650/92C24A/FFFFFF?text=No+Images" class="d-block w-100" alt="No images available"></div>`;
+        return;
+    }
+    images.forEach((img,index) => {
+        const item=document.createElement('div');
+        item.className=`carousel-item ${index===0?'active':''}`;
+        item.innerHTML=`<img src="${img}" class="d-block w-100" alt="${pg.name||'PG'}" onerror="this.src='https://placehold.co/1200x650/92C24A/FFFFFF?text=Image+Not+Found'">`;
+        carouselInner.appendChild(item);
+    });
+}
+
+function openPGContactModal(pg) {
+    const modal=document.getElementById('pgContactModal');
+    if(!modal) return;
+    const name=pg?.name||'Selected PG', location=pg?.location||'Location TBD';
+    const nameEl=document.getElementById('contactPgName'), locEl=document.getElementById('contactPgLocation'), subEl=document.getElementById('contactPgSubtitle');
+    if(nameEl) nameEl.textContent=name;
+    if(locEl) locEl.textContent=location;
+    if(subEl) subEl.textContent=`Tell us what you need at ${name} and we'll help you with the next step.`;
+    const message=document.getElementById('pgContactMessage');
+    if(message && !message.value) message.value=`Hi LIVINKEY, I am interested in ${name}${location ? ` at ${location}`:''}.`;
+    bootstrap.Modal.getOrCreateInstance(modal).show();
+}
+
+// Instead of blocking the whole screen the instant the page loads, the PG
+// enquiry panel now slides in from the side once the visitor has actually
+// started reading the page (scrolled a little), and only ever once per visit.
+function autoOpenPGContactOnScroll(pg) {
+    const modalEl = document.getElementById('pgContactModal');
+    if (!modalEl) return;
+    let shown = false;
+    const SCROLL_THRESHOLD = 320; // px scrolled before we offer the panel
+
+    const maybeShow = () => {
+        if (shown) return;
+        if (window.scrollY > SCROLL_THRESHOLD) {
+            shown = true;
+            openPGContactModal(pg);
+            window.removeEventListener('scroll', maybeShow);
+        }
+    };
+    window.addEventListener('scroll', maybeShow, { passive: true });
+    // If the page is short enough that scrolling 320px isn't possible,
+    // fall back to a gentle delayed reveal so the offer still appears.
+    setTimeout(() => {
+        if (shown) return;
+        const canScroll = document.documentElement.scrollHeight - window.innerHeight > SCROLL_THRESHOLD;
+        if (!canScroll) { shown = true; openPGContactModal(pg); window.removeEventListener('scroll', maybeShow); }
+    }, 4000);
+}
+
+function initPGContactForm(pg) {
+    const form=document.getElementById('pgContactForm'), button=document.getElementById('pgContactSubmit');
+    if(!form || !button) return;
+    form.addEventListener('submit',e=>{
+        e.preventDefault(); setButtonLoading(button,true);
+        const name=document.getElementById('pgContactName')?.value.trim()||'';
+        const phone=document.getElementById('pgContactPhone')?.value.trim()||'';
+        const email=document.getElementById('pgContactEmail')?.value.trim()||'';
+        const message=document.getElementById('pgContactMessage')?.value.trim()||'';
+        const text=['Hi LIVINKEY!','',`I am interested in: ${pg?.name||'this PG'}`,`Location: ${pg?.location||'Not specified'}`,`Name: ${name}`,`Phone: ${phone}`,email?`Email: ${email}`:'',`Message: ${message||`I would like more information about ${pg?.name||'this PG'}.`}`].filter(Boolean).join('\n');
+        setTimeout(()=>{window.open(`https://wa.me/919878383497?text=${encodeURIComponent(text)}`,'_blank','noopener');setButtonLoading(button,false);},350);
+    });
+}
+
+async function initPGDetailPage() {
+    const params=new URLSearchParams(window.location.search), pgId=parseInt(params.get('pg'),10);
+    const loading=document.getElementById('pgDetailLoading'), content=document.getElementById('pgDetailContent'), error=document.getElementById('pgDetailError');
+    if(!pgId){ if(loading) loading.classList.add('d-none'); if(error){error.classList.remove('d-none');error.innerHTML=`<i class="bi bi-house-x"></i><h2>PG not found</h2><p>We couldn't identify the PG you were trying to open.</p><a href="pgs.html" class="btn btn-primary rounded-pill px-4">Browse all PGs</a>`;} return; }
+    try {
+        const pg=await fetchPGDetails(pgId);
+        document.title=`${pg.name||'PG Details'} - LIVINKEY`;
+        document.getElementById('detailPgName').textContent=pg.name||'PG Name';
+        document.getElementById('detailLocation').textContent=pg.location||'Location TBD';
+        document.getElementById('detailRent').textContent=(pg.rent||0).toLocaleString('en-IN');
+        document.getElementById('detailRooms').textContent=pg.total_rooms||0;
+        const available=Math.max(0,(pg.total_capacity||0)-(pg.total_occupied||0));
+        document.getElementById('detailAvailable').textContent=available;
+        const status=pg.status_text||'Vacant';
+        document.getElementById('detailStatus').textContent=getStatusText(status);
+        const rating=parseFloat(pg.overall_rating)||0;
+        document.getElementById('detailRating').textContent=rating>0?rating.toFixed(1):'New';
+        renderDetailGallery(pg); renderDetailAmenities(extractAmenities(pg)); renderDetailReviews(pg.reviews||[]);
+        const av=document.getElementById('detailAvailabilityText');
+        if(av) av.textContent=available>0?`${available} bed${available===1?'':'s'} currently shown as available. Availability can change, so contact LIVINKEY to confirm before booking.`:'This PG currently has no available beds shown. Contact LIVINKEY for the latest availability.';
+        const wa=document.getElementById('whatsappPgBtn');
+        if(wa) wa.href=`https://wa.me/919878383497?text=${encodeURIComponent(`Hi LIVINKEY, I want to enquire about ${pg.name||'this PG'}${pg.location?` in ${pg.location}`:''}.`)}`;
+        const contact=document.getElementById('contactPgBtn');
+        if(contact) contact.addEventListener('click',()=>openPGContactModal(pg));
+        initPGContactForm(pg);
+        if(loading) loading.classList.add('d-none');
+        if(content){content.classList.remove('d-none');requestAnimationFrame(()=>content.querySelectorAll('.reveal').forEach(el=>el.classList.add('is-visible')));}
+        autoOpenPGContactOnScroll(pg);
+    } catch(err) {
+        console.error('PG detail page error:',err);
+        if(loading) loading.classList.add('d-none');
+        if(error){error.classList.remove('d-none');error.innerHTML=`<i class="bi bi-wifi-off"></i><h2>We couldn't load this PG</h2><p>Please check your connection and try again.</p><button class="btn btn-primary rounded-pill px-4" onclick="location.reload()">Try again</button>`;}
+    } finally { hidePageLoading(); }
+}
+
 // SEARCH & FILTER
 // ============================================================
 
@@ -392,6 +647,7 @@ async function filterPGs() {
         const filters = buildFiltersFromUI();
         const pgs = await fetchAllPGs(filters);
         renderPGCards(pgs, 'pgCardContainer');
+        initPGSlider();
     } catch {
         const container = document.getElementById('pgCardContainer');
         if (container) {
@@ -743,20 +999,11 @@ function initChatbot() {
 function handlePGParameter() {
     const urlParams = new URLSearchParams(window.location.search);
     const pgId = urlParams.get('pg');
-    if (pgId) {
-        const id = parseInt(pgId);
-        setTimeout(() => {
-            const modalExists = document.getElementById('pgDetailModal');
-            if (modalExists) {
-                openDetailModal(id);
-            } else {
-                window.location.href = `pgs.html?pg=${pgId}`;
-            }
-        }, 800);
+    if (pgId && window.location.pathname.split('/').pop() === 'pgs.html') {
+        window.location.replace(`pg-details.html?pg=${encodeURIComponent(pgId)}`);
     }
 }
 
-// ============================================================
 // PAGE-SPECIFIC INITIALIZATION
 // ============================================================
 
@@ -800,6 +1047,7 @@ async function initHomePage() {
 
         const topPGs = Array.isArray(pgs) ? pgs.slice(0, 10) : [];
         renderPGCards(topPGs, 'topPropertiesContainer', true);
+        initPGSlider('topPropertiesContainer', 'homePgSliderViewport', 'homePgSliderPrev', 'homePgSliderNext');
 
         animateCounters();
     } catch {
@@ -842,6 +1090,7 @@ async function initPGsPage() {
     try {
         const pgs = await fetchAllPGs();
         renderPGCards(pgs, 'pgCardContainer', true);
+        initPGSlider();
         handlePGParameter();
     } catch {
         const container = document.getElementById('pgCardContainer');
@@ -1163,11 +1412,56 @@ function closeFeedbackModal() {
 }
 
 // ============================================================
+// GLOBAL PAGE LOADING STATE
+// ============================================================
+
+function ensurePageLoader() {
+    if (document.getElementById('globalPageLoader')) return;
+    const loader = document.createElement('div');
+    loader.id = 'globalPageLoader';
+    loader.className = 'global-page-loader';
+    loader.innerHTML = `
+        <div class="global-loader-card">
+            <div class="loader-mark"><i class="bi bi-key-fill"></i></div>
+            <div class="spinner-border" role="status"></div>
+            <span id="globalPageLoaderText">Loading...</span>
+        </div>`;
+    document.body.appendChild(loader);
+}
+
+function showPageLoading(message = 'Loading...') {
+    ensurePageLoader();
+    const loader = document.getElementById('globalPageLoader');
+    const text = document.getElementById('globalPageLoaderText');
+    if (text) text.textContent = message;
+    requestAnimationFrame(() => loader.classList.add('is-visible'));
+}
+
+function hidePageLoading() {
+    const loader = document.getElementById('globalPageLoader');
+    if (loader) loader.classList.remove('is-visible');
+}
+
+function initNavigationLoading() {
+    document.querySelectorAll('a[href]').forEach(link => {
+        link.addEventListener('click', function(e) {
+            const href = this.getAttribute('href');
+            if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:') ||
+                href.startsWith('https://wa.me/') || this.target === '_blank' || href.startsWith('javascript:')) return;
+            if (this.origin !== window.location.origin) return;
+            showPageLoading('Loading page...');
+        });
+    });
+}
+
+// ============================================================
 // MAIN INITIALIZATION
 // ============================================================
 
 document.addEventListener('DOMContentLoaded', function () {
+    ensurePageLoader();
     initNavbarScroll();
+    initNavigationLoading();
     initChatbot();
     initHelpForm();
     initFeedbackModal();
@@ -1190,6 +1484,8 @@ document.addEventListener('DOMContentLoaded', function () {
         initPGsPage();
     } else if (pageType === 'about.html') {
         initAboutPage();
+    } else if (pageType === 'pg-details.html') {
+        initPGDetailPage();
     }
 
     observeReveals();
@@ -1197,6 +1493,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
 window.filterPGs = filterPGs;
 window.openDetailModal = openDetailModal;
+window.openPGContactModal = openPGContactModal;
 window.fetchAllPGs = fetchAllPGs;
 window.loadFeedbackForm = loadFeedbackForm;
 window.closeFeedbackModal = closeFeedbackModal;
+// Hide transition loader when returning through browser back/forward cache.
+window.addEventListener('pageshow', hidePageLoading);

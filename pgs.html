@@ -141,8 +141,13 @@
             </div>
         </div>
 
-        <!-- PG CARDS -->
-        <div class="row g-4" id="pgCardContainer">
+        <!-- PG CARDS SLIDER -->
+        <div class="pg-slider-shell">
+            <button class="pg-slider-arrow pg-slider-prev" type="button" aria-label="Previous PGs" id="pgSliderPrev">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <div class="pg-slider-viewport" id="pgSliderViewport">
+                <div class="pg-slider-track" id="pgCardContainer">
             <!-- Rendered by JavaScript -->
             <div class="col-12 text-center py-5">
                 <div class="spinner-border text-success" role="status">
@@ -150,45 +155,16 @@
                 </div>
                 <p class="mt-3 text-muted">Loading PGs...</p>
             </div>
-        </div>
-    </main>
-
-    <!-- DETAIL MODAL -->
-    <div class="modal fade" id="pgDetailModal" tabindex="-1">
-        <div class="modal-dialog modal-lg modal-dialog-scrollable">
-            <div class="modal-content border-0 shadow-lg">
-                <div class="modal-header border-0">
-                    <h5 class="modal-title fw-bold" id="detailPgName">PG Name</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div id="detailCarousel" class="carousel slide mb-3" data-bs-ride="carousel">
-                        <div class="carousel-inner" id="detailCarouselInner"></div>
-                        <button class="carousel-control-prev" type="button" data-bs-target="#detailCarousel" data-bs-slide="prev">
-                            <span class="carousel-control-prev-icon bg-dark rounded-circle p-2"></span>
-                        </button>
-                        <button class="carousel-control-next" type="button" data-bs-target="#detailCarousel" data-bs-slide="next">
-                            <span class="carousel-control-next-icon bg-dark rounded-circle p-2"></span>
-                        </button>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-8">
-                            <p><i class="bi bi-geo-alt text-success"></i> <span id="detailLocation">Location</span></p>
-                            <p><span class="fw-bold">Rent:</span> ₹<span id="detailRent">0</span>/month</p>
-                            <p><span class="fw-bold">Rooms:</span> <span id="detailRooms">0</span> | <span class="fw-bold">Available:</span> <span id="detailAvailable">0</span></p>
-                            <p><span class="fw-bold">Amenities:</span> <span id="detailAmenities"></span></p>
-                            <hr />
-                            <h6 class="fw-bold"><i class="bi bi-chat-left-text"></i> Reviews</h6>
-                            <div id="detailReviews" class="small"></div>
-                        </div>
-                        <div class="col-md-4 d-flex flex-column gap-2">
-                            <a href="https://wa.me/919878383497?text=Hi%20LIVINKEY%2C%20I%20want%20to%20book%20this%20PG" target="_blank" class="btn btn-success rounded-pill py-2 fw-bold"><i class="bi bi-whatsapp me-2"></i>Book on WhatsApp</a>
-                        </div>
-                    </div>
                 </div>
             </div>
+            <button class="pg-slider-arrow pg-slider-next" type="button" aria-label="Next PGs" id="pgSliderNext">
+                <i class="bi bi-chevron-right"></i>
+            </button>
         </div>
-    </div>
+        <div class="pg-slider-hint text-center small text-muted mt-3">
+            <i class="bi bi-arrows"></i> Swipe or use the arrows to explore PGs
+        </div>
+    </main>
 
     <!-- FOOTER -->
     <footer>
