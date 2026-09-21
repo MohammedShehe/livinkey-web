@@ -952,7 +952,7 @@ function initChatbot() {
             'booking': 'Booking is easy! Just follow these steps:\n1. Browse our PG listings\n2. Click "Book on WhatsApp" on any property\n3. Our team will guide you through the process\n4. Complete the booking and move in!',
             'security': 'Security is our top priority! All our properties have: 24/7 CCTV surveillance, Secure access systems, On-site security guards, and Well-lit common areas. Your safety is our commitment.',
             'location': 'We have properties strategically located near LPU, Law Gate, Phagwara City Center, and RS Rooms. Each property listing shows its exact location on the map.',
-            'contact': 'You can reach us at:\n📱 WhatsApp: +91 98783 83497\n📧 Email: livinkey@gmail.com\n📍 Office: Near LPU, Law Gate, Punjab\nOr use our contact form on the Contact page!',
+            'contact': 'You can reach us at:\n📱 WhatsApp: +91 98783 83497\n📧 Email: livinkey@gmail.com\n📍 Office: Near LPU, Law Gate, India\nOr use our contact form on the Contact page!',
             'help': 'I\'m here to help! You can ask me about:\n• Rent prices\n• Amenities\n• Booking process\n• Location information\n• Security features\n• Contact details\nJust ask away!'
         };
 
