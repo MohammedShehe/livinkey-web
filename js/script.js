@@ -192,6 +192,38 @@ function getStatusText(status) {
     return statusMap[status] || status || 'Vacant';
 }
 
+
+function countEmptyRooms(pg) {
+    let availableRooms = 0;
+    if (!pg || !Array.isArray(pg.floors)) return null;
+    pg.floors.forEach(floor => {
+        if (Array.isArray(floor.rooms)) {
+            floor.rooms.forEach(room => {
+                if (room.is_active !== 0 && (room.occupied_count || 0) === 0) {
+                    availableRooms++;
+                }
+            });
+        }
+    });
+    return availableRooms;
+}
+
+async function enrichPGsWithEmptyRooms(pgs) {
+    if (!Array.isArray(pgs) || pgs.length === 0) return pgs || [];
+    return Promise.all(pgs.map(async (pg) => {
+        if (pg.empty_rooms != null) return pg;
+        if (Array.isArray(pg.floors)) {
+            return { ...pg, empty_rooms: countEmptyRooms(pg) };
+        }
+        try {
+            const detail = await fetchPGDetails(pg.id);
+            return { ...pg, floors: detail.floors, empty_rooms: countEmptyRooms(detail) };
+        } catch {
+            return { ...pg, empty_rooms: null };
+        }
+    }));
+}
+
 function renderPGCards(pgs, containerId, clickable = true) {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -238,7 +270,7 @@ function renderPGCards(pgs, containerId, clickable = true) {
                     </div>
                     <div class="mt-2 small">
                         <span>🛏 ${pg.total_rooms || 0} rooms</span>
-                        <span class="ms-2">👤 ${(pg.total_capacity || 0) - (pg.total_occupied || 0)} available</span>
+                        <span class="ms-2">🏠 ${pg.empty_rooms != null ? pg.empty_rooms : '—'} vacant rooms</span>
                     </div>
                 </div>
             </div>
@@ -574,17 +606,18 @@ async function initPGDetailPage() {
         document.title=`${pg.name||'PG Details'} - LIVINKEY`;
         document.getElementById('detailPgName').textContent=pg.name||'PG Name';
         document.getElementById('detailLocation').textContent=pg.location||'Location TBD';
-        document.getElementById('detailRent').textContent=(pg.rent||0).toLocaleString('en-IN');
         document.getElementById('detailRooms').textContent=pg.total_rooms||0;
-        const available=Math.max(0,(pg.total_capacity||0)-(pg.total_occupied||0));
-        document.getElementById('detailAvailable').textContent=available;
+        const availableRooms = countEmptyRooms(pg) ?? 0;
+        document.getElementById('detailAvailable').textContent=availableRooms;
+        const rentNum = parseFloat(pg.rent) || 0;
+        document.getElementById('detailRent').textContent = '₹' + rentNum.toLocaleString('en-IN');
         const status=pg.status_text||'Vacant';
         document.getElementById('detailStatus').textContent=getStatusText(status);
         const rating=parseFloat(pg.overall_rating)||0;
         document.getElementById('detailRating').textContent=rating>0?rating.toFixed(1):'New';
         renderDetailGallery(pg); renderDetailAmenities(extractAmenities(pg)); renderDetailReviews(pg.reviews||[]);
         const av=document.getElementById('detailAvailabilityText');
-        if(av) av.textContent=available>0?`${available} bed${available===1?'':'s'} currently shown as available. Availability can change, so contact LIVINKEY to confirm before booking.`:'This PG currently has no available beds shown. Contact LIVINKEY for the latest availability.';
+        if(av) av.textContent=availableRooms>0?`${availableRooms} completely empty room${availableRooms===1?'':'s'} currently available. Availability can change, so contact LIVINKEY to confirm before booking.`:'This PG currently has no completely empty rooms shown. Contact LIVINKEY for the latest availability.';
         const wa=document.getElementById('whatsappPgBtn');
         if(wa) wa.href=`https://wa.me/919878383497?text=${encodeURIComponent(`Hi LIVINKEY, I want to enquire about ${pg.name||'this PG'}${pg.location?` in ${pg.location}`:''}.`)}`;
         const contact=document.getElementById('contactPgBtn');
@@ -635,7 +668,7 @@ async function filterPGs() {
 
     try {
         const filters = buildFiltersFromUI();
-        const pgs = await fetchAllPGs(filters);
+        const pgs = await enrichPGsWithEmptyRooms(await fetchAllPGs(filters));
         renderPGCards(pgs, 'pgCardContainer');
         initPGSlider();
     } catch {
@@ -1036,7 +1069,7 @@ async function initHomePage() {
         }
 
         const topPGs = Array.isArray(pgs) ? pgs.slice(0, 10) : [];
-        renderPGCards(topPGs, 'topPropertiesContainer', true);
+        renderPGCards(await enrichPGsWithEmptyRooms(topPGs), 'topPropertiesContainer', true);
         initPGSlider('topPropertiesContainer', 'homePgSliderViewport', 'homePgSliderPrev', 'homePgSliderNext');
 
         animateCounters();
@@ -1079,7 +1112,7 @@ async function initPGsPage() {
 
     try {
         const pgs = await fetchAllPGs();
-        renderPGCards(pgs, 'pgCardContainer', true);
+        renderPGCards(await enrichPGsWithEmptyRooms(pgs), 'pgCardContainer', true);
         initPGSlider();
         handlePGParameter();
     } catch {

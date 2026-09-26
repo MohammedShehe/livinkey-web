@@ -2157,14 +2157,18 @@ footer .bi-heart-fill {
     border-right: 1px solid rgba(20,23,15,.08);
 }
 .detail-stat-grid > div:last-child { border-right: 0; }
-.detail-stat-grid span {
+.detail-stat-grid > div > span {
     display: block;
     color: #777b72;
     font-size: .76rem;
     font-weight: 700;
     margin-bottom: .25rem;
 }
-.detail-stat-grid strong { font-size: 1.12rem; }
+.detail-stat-grid strong {
+    font-size: 1.12rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
 
 .detail-actions {
     display: flex;
