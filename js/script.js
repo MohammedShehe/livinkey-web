@@ -935,7 +935,7 @@ function initChatbot() {
                     <div class="chatbot-result-row">📍 ${escapeHtml(pg.location || 'Location not listed')}</div>
                     <div class="chatbot-result-grid">
                         <span>💰 ${formatMoney(pg.rent)}</span>
-                        <span>🛏️ ${Number(pg.available_spots || 0)} available spots</span>
+                        <span>🛏️ ${Number(pg.available_spots || 0)} completely vacant rooms</span>
                     </div>
                     ${pg.amenities ? `<div class="chatbot-result-amenities">✨ ${escapeHtml(pg.amenities)}</div>` : ''}
                     <a class="chatbot-result-link" href="pg-details.html?pg=${encodeURIComponent(pg.id)}">View PG</a>
@@ -965,7 +965,7 @@ function initChatbot() {
                     <div class="chatbot-result-row">📍 ${escapeHtml(data.location || 'Location not listed')}</div>
                     <div class="chatbot-result-grid">
                         <span>💰 ${formatMoney(data.rent)}</span>
-                        <span>🛏️ ${Number(data.available_spots || 0)} available spots</span>
+                        <span>🛏️ ${Number(data.available_spots || 0)} completely vacant rooms</span>
                     </div>
                     ${data.security_fee != null ? `<div class="chatbot-result-row">🔐 Security fee: ${formatMoney(data.security_fee)}</div>` : ''}
                     ${data.amenities ? `<div class="chatbot-result-amenities">✨ ${escapeHtml(data.amenities)}</div>` : ''}
