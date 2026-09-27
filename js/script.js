@@ -3,6 +3,7 @@
 // ============================================================
 
 const API_BASE = 'https://api.livinkey.com/api';
+const CHATBOT_API_VERSION = '20260927-dynamic';
 
 // ============================================================
 // API HELPER FUNCTIONS
@@ -15,6 +16,7 @@ async function apiFetch(endpoint, options = {}) {
             'Content-Type': 'application/json',
             ...options.headers,
         },
+        cache: 'no-store',
         ...options,
     };
 
@@ -903,6 +905,7 @@ function initChatbot() {
     `;
 
     let isOpen = false;
+    let lastQuickQuestionLoad = 0;
     const chatToggle = document.getElementById('chatToggle');
     const chatWindow = document.getElementById('chatWindow');
     const chatClose = document.getElementById('chatClose');
@@ -926,6 +929,9 @@ function initChatbot() {
         if (isOpen) {
             chatInput.focus();
             scrollToBottom();
+            if (Date.now() - lastQuickQuestionLoad > 60000) {
+                loadQuickQuestions();
+            }
         }
     });
 
@@ -991,9 +997,10 @@ function initChatbot() {
 
     async function loadQuickQuestions() {
         try {
-            const result = await apiFetch('/chatbot/quick-questions');
+            const result = await apiFetch(`/chatbot/quick-questions?v=${CHATBOT_API_VERSION}`);
             const data = result.data || {};
             setQuickQuestions(data.questions || []);
+            lastQuickQuestionLoad = Date.now();
         } catch (error) {
             console.error('Unable to load chatbot quick questions:', error);
             quickQuestions.innerHTML = '<div class="quick-loading">Quick questions are temporarily unavailable.</div>';
