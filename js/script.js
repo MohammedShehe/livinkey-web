@@ -3,7 +3,6 @@
 // ============================================================
 
 const API_BASE = 'https://api.livinkey.com/api';
-const CHATBOT_API_VERSION = '20260927-dynamic';
 
 // ============================================================
 // API HELPER FUNCTIONS
@@ -16,7 +15,6 @@ async function apiFetch(endpoint, options = {}) {
             'Content-Type': 'application/json',
             ...options.headers,
         },
-        cache: 'no-store',
         ...options,
     };
 
@@ -905,7 +903,6 @@ function initChatbot() {
     `;
 
     let isOpen = false;
-    let lastQuickQuestionLoad = 0;
     const chatToggle = document.getElementById('chatToggle');
     const chatWindow = document.getElementById('chatWindow');
     const chatClose = document.getElementById('chatClose');
@@ -923,15 +920,69 @@ function initChatbot() {
     const formatBotText = (text) =>
         escapeHtml(text).replace(/\n/g, '<br>');
 
+    const formatMoney = (value) => {
+        const amount = Number(value || 0);
+        return `₹${amount.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
+    };
+
+    function renderPgResultCards(data, view) {
+        if (!data) return '';
+
+        if (view === 'pg_list' && Array.isArray(data)) {
+            return data.map(pg => `
+                <div class="chatbot-result-card">
+                    <div class="chatbot-result-title">🏠 ${escapeHtml(pg.name || 'PG')}</div>
+                    <div class="chatbot-result-row">📍 ${escapeHtml(pg.location || 'Location not listed')}</div>
+                    <div class="chatbot-result-grid">
+                        <span>💰 ${formatMoney(pg.rent)}</span>
+                        <span>🛏️ ${Number(pg.available_spots || 0)} available spots</span>
+                    </div>
+                    ${pg.amenities ? `<div class="chatbot-result-amenities">✨ ${escapeHtml(pg.amenities)}</div>` : ''}
+                    <a class="chatbot-result-link" href="pg-details.html?pg=${encodeURIComponent(pg.id)}">View PG</a>
+                </div>
+            `).join('');
+        }
+
+        if (view === 'vacant_rooms' && Array.isArray(data)) {
+            return data.map(room => `
+                <div class="chatbot-result-card room-result-card">
+                    <div class="chatbot-result-title">🚪 ${escapeHtml(room.pg_name || 'PG')} — Room ${escapeHtml(room.room_number || '—')}</div>
+                    <div class="chatbot-result-row">📍 ${escapeHtml(room.location || 'Location not listed')}</div>
+                    <div class="chatbot-result-grid">
+                        <span>🏢 Floor ${escapeHtml(room.floor_number ?? '—')}</span>
+                        <span>👥 Capacity ${Number(room.capacity || 0)}</span>
+                        <span>💰 ${formatMoney(room.room_rent || room.pg_rent)}</span>
+                    </div>
+                    <a class="chatbot-result-link" href="pg-details.html?pg=${encodeURIComponent(room.pg_id)}">View PG</a>
+                </div>
+            `).join('');
+        }
+
+        if (view === 'pg_detail' && data.name) {
+            return `
+                <div class="chatbot-result-card">
+                    <div class="chatbot-result-title">🏠 ${escapeHtml(data.name)}</div>
+                    <div class="chatbot-result-row">📍 ${escapeHtml(data.location || 'Location not listed')}</div>
+                    <div class="chatbot-result-grid">
+                        <span>💰 ${formatMoney(data.rent)}</span>
+                        <span>🛏️ ${Number(data.available_spots || 0)} available spots</span>
+                    </div>
+                    ${data.security_fee != null ? `<div class="chatbot-result-row">🔐 Security fee: ${formatMoney(data.security_fee)}</div>` : ''}
+                    ${data.amenities ? `<div class="chatbot-result-amenities">✨ ${escapeHtml(data.amenities)}</div>` : ''}
+                    <a class="chatbot-result-link" href="pg-details.html?pg=${encodeURIComponent(data.id)}">View PG</a>
+                </div>
+            `;
+        }
+
+        return '';
+    }
+
     chatToggle.addEventListener('click', () => {
         isOpen = !isOpen;
         chatWindow.classList.toggle('active', isOpen);
         if (isOpen) {
             chatInput.focus();
             scrollToBottom();
-            if (Date.now() - lastQuickQuestionLoad > 60000) {
-                loadQuickQuestions();
-            }
         }
     });
 
@@ -940,13 +991,23 @@ function initChatbot() {
         chatWindow.classList.remove('active');
     });
 
-    function addMessage(text, sender) {
+    function addMessage(text, sender, meta = {}) {
         const div = document.createElement('div');
         div.className = `chat-message ${sender}-message`;
+
+        let bubbleContent = sender === 'bot' ? formatBotText(text) : escapeHtml(text);
+        if (sender === 'bot' && meta.view) {
+            const heading = String(text || '').split('\n')[0];
+            const cards = renderPgResultCards(meta.data, meta.view);
+            if (cards) {
+                bubbleContent = `${escapeHtml(heading)}<div class="chatbot-result-list">${cards}</div>`;
+            }
+        }
+
         div.innerHTML = `
             <div class="message-content">
                 ${sender === 'bot' ? '<span class="message-avatar" aria-hidden="true">🔑</span>' : ''}
-                <div class="message-bubble">${sender === 'bot' ? formatBotText(text) : escapeHtml(text)}</div>
+                <div class="message-bubble">${bubbleContent}</div>
             </div>
         `;
         chatMessages.appendChild(div);
@@ -997,10 +1058,9 @@ function initChatbot() {
 
     async function loadQuickQuestions() {
         try {
-            const result = await apiFetch(`/chatbot/quick-questions?v=${CHATBOT_API_VERSION}`);
+            const result = await apiFetch('/chatbot/quick-questions');
             const data = result.data || {};
             setQuickQuestions(data.questions || []);
-            lastQuickQuestionLoad = Date.now();
         } catch (error) {
             console.error('Unable to load chatbot quick questions:', error);
             quickQuestions.innerHTML = '<div class="quick-loading">Quick questions are temporarily unavailable.</div>';
@@ -1027,7 +1087,8 @@ function initChatbot() {
             const data = result.data || {};
             addMessage(
                 data.answer || 'I could not find an answer in the current database.',
-                'bot'
+                'bot',
+                { view: data.view, data: data.data }
             );
         } catch (error) {
             hideTypingIndicator();
