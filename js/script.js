@@ -815,6 +815,8 @@ function initNavbarScroll() {
 // ============================================================
 // CHATBOT
 // ============================================================
+// The chatbot UI contains no factual PG/rent/amenity data.
+// Questions and answers are loaded from the live backend/database.
 
 function initChatbot() {
     const container = document.getElementById('chatbot-container');
@@ -858,6 +860,7 @@ function initChatbot() {
             </div>
             <span class="chatbot-badge">💬</span>
         </div>
+
         <div class="chatbot-window" id="chatWindow" role="dialog" aria-label="Chat assistant">
             <div class="chatbot-header">
                 <div class="chatbot-header-content">
@@ -871,30 +874,29 @@ function initChatbot() {
                     </div>
                     <div>
                         <h6 class="mb-0 fw-bold">LIVINKEY Assistant</h6>
-                        <small class="text-muted">Online · Ready to help</small>
+                        <small class="text-muted">Live PG database</small>
                     </div>
                 </div>
                 <button class="chatbot-close" id="chatClose" aria-label="Close chat"><i class="bi bi-x-lg"></i></button>
             </div>
+
             <div class="chatbot-messages" id="chatMessages">
                 <div class="chat-message bot-message">
                     <div class="message-content">
                         <span class="message-avatar" aria-hidden="true">🔑</span>
                         <div class="message-bubble">
-                            Hello! I'm the LIVINKEY assistant. How can I help you find your perfect PG?
+                            Hello! Ask me about current PG availability, rent, amenities, locations, or other information stored in the LIVINKEY database.
                         </div>
                     </div>
                 </div>
             </div>
+
             <div class="chatbot-quick-questions" id="quickQuestions">
-                <button class="quick-btn" data-question="What are the rent prices?">💰 Rent prices</button>
-                <button class="quick-btn" data-question="Do you have AC rooms?">❄️ AC rooms</button>
-                <button class="quick-btn" data-question="Is food included?">🍽️ Food included</button>
-                <button class="quick-btn" data-question="What amenities are available?">🏊 Amenities</button>
-                <button class="quick-btn" data-question="How to book a PG?">📝 Booking process</button>
+                <div class="quick-loading">Loading questions...</div>
             </div>
+
             <div class="chatbot-input-area">
-                <input type="text" class="chatbot-input" id="chatInput" placeholder="Type your message..." aria-label="Type your message" />
+                <input type="text" class="chatbot-input" id="chatInput" placeholder="Ask about our current PGs..." aria-label="Type your message" maxlength="500" />
                 <button class="chatbot-send" id="chatSend" aria-label="Send message"><i class="bi bi-send-fill"></i></button>
             </div>
         </div>
@@ -907,7 +909,16 @@ function initChatbot() {
     const chatMessages = document.getElementById('chatMessages');
     const chatInput = document.getElementById('chatInput');
     const chatSend = document.getElementById('chatSend');
-    const quickBtns = document.querySelectorAll('.quick-btn');
+    const quickQuestions = document.getElementById('quickQuestions');
+
+    const escapeHtml = (value) => {
+        const div = document.createElement('div');
+        div.textContent = String(value ?? '');
+        return div.innerHTML;
+    };
+
+    const formatBotText = (text) =>
+        escapeHtml(text).replace(/\n/g, '<br>');
 
     chatToggle.addEventListener('click', () => {
         isOpen = !isOpen;
@@ -923,29 +934,16 @@ function initChatbot() {
         chatWindow.classList.remove('active');
     });
 
-    function sendMessage(message) {
-        if (!message.trim()) return;
-        addMessage(message, 'user');
-        chatInput.value = '';
-        showTypingIndicator();
-        setTimeout(() => {
-            hideTypingIndicator();
-            const response = getBotResponse(message);
-            addMessage(response, 'bot');
-            scrollToBottom();
-        }, 800 + Math.random() * 600);
-    }
-
     function addMessage(text, sender) {
         const div = document.createElement('div');
         div.className = `chat-message ${sender}-message`;
         div.innerHTML = `
             <div class="message-content">
                 ${sender === 'bot' ? '<span class="message-avatar" aria-hidden="true">🔑</span>' : ''}
-                <div class="message-bubble">${text}</div>
+                <div class="message-bubble">${sender === 'bot' ? formatBotText(text) : escapeHtml(text)}</div>
             </div>
         `;
-        chatMessages.insertBefore(div, chatMessages.querySelector('.typing-indicator') || chatMessages.lastChild);
+        chatMessages.appendChild(div);
         scrollToBottom();
     }
 
@@ -972,43 +970,78 @@ function initChatbot() {
         if (indicator) indicator.remove();
     }
 
-    function getBotResponse(message) {
-        const msg = message.toLowerCase();
+    function setQuickQuestions(items) {
+        quickQuestions.innerHTML = '';
 
-        const responses = {
-            'rent': 'Our PG rents range from ₹7,000 to ₹13,000 per month, depending on the property and amenities. You can check individual PG listings for exact prices!',
-            'price': 'Our PG rents range from ₹7,000 to ₹13,000 per month, depending on the property and amenities. You can check individual PG listings for exact prices!',
-            'ac': 'Yes! Many of our PGs offer AC rooms. Check the amenities section of each PG for details.',
-            'food': 'Most of our PGs do not include food in the rent. However, each property has a fully-equipped kitchen where you can cook, and many are located near restaurants and food joints.',
-            'amenities': 'Our amenities vary by property but commonly include: WiFi, AC, 24/7 Security, CCTV, Gym, Power Backup, Water Purifier, and Common Areas. Check individual PG listings for specific amenities.',
-            'book': 'Booking is easy! Just follow these steps:\n1. Browse our PG listings\n2. Click "Book on WhatsApp" on any property\n3. Our team will guide you through the process\n4. Complete the booking and move in!',
-            'booking': 'Booking is easy! Just follow these steps:\n1. Browse our PG listings\n2. Click "Book on WhatsApp" on any property\n3. Our team will guide you through the process\n4. Complete the booking and move in!',
-            'security': 'Security is our top priority! All our properties have: 24/7 CCTV surveillance, Secure access systems, On-site security guards, and Well-lit common areas. Your safety is our commitment.',
-            'location': 'We have properties strategically located near LPU, Law Gate, Phagwara City Center, and RS Rooms. Each property listing shows its exact location on the map.',
-            'contact': 'You can reach us at:\n📱 WhatsApp: +91 98783 83497\n📧 Email: livinkey@gmail.com\n📍 Office: Near LPU, Law Gate, India\nOr use our contact form on the Contact page!',
-            'help': 'I\'m here to help! You can ask me about:\n• Rent prices\n• Amenities\n• Booking process\n• Location information\n• Security features\n• Contact details\nJust ask away!'
-        };
-
-        for (const [key, value] of Object.entries(responses)) {
-            if (msg.includes(key)) {
-                return value;
-            }
+        if (!Array.isArray(items) || items.length === 0) {
+            quickQuestions.innerHTML = '<div class="quick-loading">Ask me anything about the current PG data.</div>';
+            return;
         }
 
-        return "Thanks for your question! I'd be happy to help. Could you be more specific? You can ask about rent, amenities, booking, locations, or anything else about our PGs. Or feel free to contact us directly via WhatsApp!";
+        items.forEach(item => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'quick-btn';
+            button.dataset.question = item.question;
+            button.textContent = item.label || item.question;
+            button.addEventListener('click', () => sendMessage(item.question));
+            quickQuestions.appendChild(button);
+        });
+    }
+
+    async function loadQuickQuestions() {
+        try {
+            const result = await apiFetch('/chatbot/quick-questions');
+            const data = result.data || {};
+            setQuickQuestions(data.questions || []);
+        } catch (error) {
+            console.error('Unable to load chatbot quick questions:', error);
+            quickQuestions.innerHTML = '<div class="quick-loading">Quick questions are temporarily unavailable.</div>';
+        }
+    }
+
+    async function sendMessage(message) {
+        const question = String(message || '').trim();
+        if (!question) return;
+
+        addMessage(question, 'user');
+        chatInput.value = '';
+        chatSend.disabled = true;
+        showTypingIndicator();
+
+        try {
+            const result = await apiFetch('/chatbot/ask', {
+                method: 'POST',
+                body: JSON.stringify({ question })
+            });
+
+            hideTypingIndicator();
+
+            const data = result.data || {};
+            addMessage(
+                data.answer || 'I could not find an answer in the current database.',
+                'bot'
+            );
+        } catch (error) {
+            hideTypingIndicator();
+            addMessage(
+                'I could not reach the live database right now. Please try again in a moment.',
+                'bot'
+            );
+        } finally {
+            chatSend.disabled = false;
+            chatInput.focus();
+            scrollToBottom();
+        }
     }
 
     chatSend.addEventListener('click', () => sendMessage(chatInput.value));
+
     chatInput.addEventListener('keyup', (e) => {
         if (e.key === 'Enter') sendMessage(chatInput.value);
     });
 
-    quickBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const question = btn.dataset.question;
-            sendMessage(question);
-        });
-    });
+    loadQuickQuestions();
 
     function scrollToBottom() {
         chatMessages.scrollTop = chatMessages.scrollHeight;
