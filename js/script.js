@@ -670,6 +670,7 @@ async function filterPGs() {
         const filters = buildFiltersFromUI();
         const pgs = await enrichPGsWithEmptyRooms(await fetchAllPGs(filters));
         renderPGCards(pgs, 'pgCardContainer');
+        initPGSlider();
     } catch {
         const container = document.getElementById('pgCardContainer');
         if (container) {
@@ -1213,6 +1214,7 @@ async function initPGsPage() {
     try {
         const pgs = await fetchAllPGs();
         renderPGCards(await enrichPGsWithEmptyRooms(pgs), 'pgCardContainer', true);
+        initPGSlider();
         handlePGParameter();
     } catch {
         const container = document.getElementById('pgCardContainer');
