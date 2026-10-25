@@ -251,7 +251,7 @@ function renderPGCards(pgs, containerId, clickable = true) {
         const ratingDisplay = rating > 0 ? rating.toFixed(1) : 'New';
 
         const col = document.createElement('div');
-        col.className = 'pg-card-col reveal';
+        col.className = container.classList.contains('pgs-listing') ? 'col-12 col-md-6 col-xl-4 pg-card-col reveal' : 'pg-card-col reveal';
         col.style.transitionDelay = `${Math.min(index, 8) * 0.06}s`;
         col.innerHTML = `
             <div class="pg-card" data-id="${pg.id}" role="button" tabindex="0" aria-label="View details for ${pg.name}">
@@ -1214,7 +1214,6 @@ async function initPGsPage() {
     try {
         const pgs = await fetchAllPGs();
         renderPGCards(await enrichPGsWithEmptyRooms(pgs), 'pgCardContainer', true);
-        initPGSlider();
         handlePGParameter();
     } catch {
         const container = document.getElementById('pgCardContainer');
