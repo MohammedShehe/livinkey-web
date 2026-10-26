@@ -1140,7 +1140,10 @@ async function initHomePage() {
         }
 
         const stats = await fetchPGStats();
-        const totalPGs = stats.total_pgs || 0;
+        // Prefer display_* = live backend counts + admin manual boost (when enabled)
+        const totalPGs = (stats.display_properties != null)
+            ? Number(stats.display_properties)
+            : (stats.total_pgs || 0);
 
         const heroCount = document.getElementById('heroPGCount');
         if (heroCount) {
@@ -1148,12 +1151,15 @@ async function initHomePage() {
         }
 
         const pgs = await fetchAllPGs();
-        let totalTenants = 0;
+        let occupancyTenants = 0;
         if (Array.isArray(pgs)) {
             pgs.forEach(pg => {
-                totalTenants += pg.total_occupied || 0;
+                occupancyTenants += pg.total_occupied || 0;
             });
         }
+        const totalTenants = (stats.display_happy_tenants != null)
+            ? Number(stats.display_happy_tenants)
+            : (stats.total_tenants != null ? Number(stats.total_tenants) : occupancyTenants);
 
         const statBoxes = document.querySelectorAll('.stat-box h3');
         if (statBoxes.length >= 2) {
@@ -1231,7 +1237,9 @@ async function initPGsPage() {
 async function initAboutPage() {
     try {
         const stats = await fetchPGStats();
-        const totalPGs = stats.total_pgs || 0;
+        const totalPGs = (stats.display_properties != null)
+            ? Number(stats.display_properties)
+            : (stats.total_pgs || 0);
         
         const propertyCountEl = document.getElementById('aboutPropertyCount');
         if (propertyCountEl) {
@@ -1239,12 +1247,15 @@ async function initAboutPage() {
         }
         
         const pgs = await fetchAllPGs();
-        let totalTenants = 0;
+        let occupancyTenants = 0;
         if (Array.isArray(pgs)) {
             pgs.forEach(pg => {
-                totalTenants += pg.total_occupied || 0;
+                occupancyTenants += pg.total_occupied || 0;
             });
         }
+        const totalTenants = (stats.display_happy_tenants != null)
+            ? Number(stats.display_happy_tenants)
+            : (stats.total_tenants != null ? Number(stats.total_tenants) : occupancyTenants);
         
         const statBoxes = document.querySelectorAll('.stat-box h3');
         if (statBoxes.length >= 2) {
