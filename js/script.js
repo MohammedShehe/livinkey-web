@@ -1,3 +1,9 @@
+/* Escapes text before it is placed into innerHTML (PG names, reviews, locations come from the API). */
+function lkEscape(v) {
+    return String(v == null ? '' : v)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
 // ============================================================
 // LIVINKEY FRONTEND - BACKEND API CONNECTION
 // ============================================================
@@ -254,16 +260,16 @@ function renderPGCards(pgs, containerId, clickable = true) {
         col.className = container.classList.contains('pgs-listing') ? 'col-12 col-md-6 col-xl-4 pg-card-col reveal' : 'pg-card-col reveal';
         col.style.transitionDelay = `${Math.min(index, 8) * 0.06}s`;
         col.innerHTML = `
-            <div class="pg-card" data-id="${pg.id}" role="button" tabindex="0" aria-label="View details for ${pg.name}">
+            <div class="pg-card" data-id="${pg.id}" role="button" tabindex="0" aria-label="View details for ${lkEscape(pg.name)}">
                 <div class="pg-card-img-wrap">
-                    <img src="${coverImage}" class="pg-card-img" alt="${pg.name}" loading="lazy" onerror="this.src='https://placehold.co/600x400/92C24A/FFFFFF?text=No+Image'">
+                    <img src="${lkEscape(coverImage)}" class="pg-card-img" alt="${lkEscape(pg.name)}" loading="lazy" onerror="this.src='https://placehold.co/600x400/92C24A/FFFFFF?text=No+Image'">
                 </div>
                 <div class="p-3">
                     <div class="d-flex justify-content-between align-items-start mb-2">
-                        <h5 class="fw-bold mb-0">${pg.name || 'Unnamed PG'}</h5>
+                        <h5 class="fw-bold mb-0">${lkEscape(pg.name || 'Unnamed PG')}</h5>
                         <span class="rating-badge">${ratingDisplay}</span>
                     </div>
-                    <p class="small text-muted mb-2"><i class="bi bi-geo-alt"></i> ${pg.location || 'Location TBD'}</p>
+                    <p class="small text-muted mb-2"><i class="bi bi-geo-alt"></i> ${lkEscape(pg.location || 'Location TBD')}</p>
                     <div class="d-flex justify-content-between align-items-center">
                         <span class="pg-status ${statusClass}">${getStatusText(statusText)}</span>
                         <span class="fw-bold text-success">₹${(pg.rent || 0).toLocaleString('en-IN')}/mo</span>
@@ -512,7 +518,7 @@ function renderDetailReviews(reviews) {
         const initials = name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
         const card = document.createElement('div');
         card.className = 'review-card detail-review-card';
-        card.innerHTML = `<div class="review-avatar">${initials}</div><div><div class="d-flex flex-wrap gap-2 align-items-center"><strong>${name}</strong>${review.rating ? `<span class="text-success">★ ${review.rating}</span>` : ''}</div><small class="text-muted">${review.comment || 'No comment provided.'}</small></div>`;
+        card.innerHTML = `<div class="review-avatar">${lkEscape(initials)}</div><div><div class="d-flex flex-wrap gap-2 align-items-center"><strong>${lkEscape(name)}</strong>${review.rating ? `<span class="text-success">★ ${review.rating}</span>` : ''}</div><small class="text-muted">${lkEscape(review.comment || 'No comment provided.')}</small></div>`;
         container.appendChild(card);
     });
 }
@@ -531,7 +537,7 @@ function renderDetailAmenities(amenities) {
         const iconKey = Object.keys(icons).find(k => key.includes(k));
         const pill = document.createElement('span');
         pill.className = 'amenity-pill';
-        pill.innerHTML = `<i class="bi ${iconKey ? icons[iconKey] : 'bi-check2-circle'}"></i>${text}`;
+        pill.innerHTML = `<i class="bi ${iconKey ? icons[iconKey] : 'bi-check2-circle'}"></i>${lkEscape(text)}`;
         container.appendChild(pill);
     });
 }
@@ -548,7 +554,7 @@ function renderDetailGallery(pg) {
     images.forEach((img,index) => {
         const item=document.createElement('div');
         item.className=`carousel-item ${index===0?'active':''}`;
-        item.innerHTML=`<img src="${img}" class="d-block w-100" alt="${pg.name||'PG'}" onerror="this.src='https://placehold.co/1200x650/92C24A/FFFFFF?text=Image+Not+Found'">`;
+        item.innerHTML=`<img src="${lkEscape(img)}" class="d-block w-100" alt="${lkEscape(pg.name||'PG')}" onerror="this.src='https://placehold.co/1200x650/92C24A/FFFFFF?text=Image+Not+Found'">`;
         carouselInner.appendChild(item);
     });
 }
@@ -1311,7 +1317,7 @@ async function loadFeedbackForm(container) {
         let optionsHtml = '<option value="">Select a PG...</option>';
         if (Array.isArray(pgs)) {
             pgs.forEach(pg => {
-                optionsHtml += `<option value="${pg.id}">${pg.name || 'Unnamed PG'} - ₹${(pg.rent || 0).toLocaleString('en-IN')}/month</option>`;
+                optionsHtml += `<option value="${pg.id}">${lkEscape(pg.name || 'Unnamed PG')} - ₹${(pg.rent || 0).toLocaleString('en-IN')}/month</option>`;
             });
         }
 
