@@ -230,6 +230,48 @@ async function enrichPGsWithEmptyRooms(pgs) {
     }));
 }
 
+// ---------------------------------------------------------------------------
+// OFFERS (managed by admins; only live offers are returned by the API)
+// ---------------------------------------------------------------------------
+function pgOffers(pg) { return Array.isArray(pg && pg.offers) ? pg.offers : []; }
+function offerRibbonHtml(pg) {
+    const o = pgOffers(pg); if (!o.length) return '';
+    const more = o.length > 1 ? `<small>+${o.length - 1} more</small>` : '';
+    return `<div class="pg-offer-ribbon" aria-label="Offer available"><i class="bi bi-gift-fill"></i><span>${lkEscape(o[0].headline)}</span>${more}</div>`;
+}
+function offerLineHtml(pg) {
+    const o = pgOffers(pg); if (!o.length) return '';
+    return `<div class="pg-offer-line"><i class="bi bi-stars"></i><span>${lkEscape(o[0].title)}</span></div>`;
+}
+function fmtOfferDate(d) { if (!d) return ''; const x = new Date(d + 'T00:00:00'); return isNaN(x) ? '' : x.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }); }
+function renderDetailOffers(pg) {
+    const wrap = document.getElementById('detailOffersSection'), box = document.getElementById('detailOffers');
+    if (!wrap || !box) return;
+    const offers = pgOffers(pg);
+    if (!offers.length) { wrap.classList.add('d-none'); return; }
+    wrap.classList.remove('d-none');
+    box.innerHTML = offers.map((o, i) => {
+        const until = o.valid_until ? `Valid till ${fmtOfferDate(o.valid_until)}` : 'Limited-time offer';
+        const msg = `Hi LIVINKEY, I'd like to claim the offer "${o.title}"${o.coupon_code ? ' (code ' + o.coupon_code + ')' : ''} at ${pg.name || 'this PG'}.`;
+        return `<article class="offer-tile">
+            <div class="offer-tile-badge">${lkEscape(o.headline)}</div>
+            <div class="offer-tile-body">
+                <h4>${lkEscape(o.title)}</h4>
+                ${o.description ? `<p>${lkEscape(o.description)}</p>` : ''}
+                <div class="offer-tile-meta"><span><i class="bi bi-clock"></i> ${lkEscape(until)}</span>
+                    ${o.coupon_code ? `<button type="button" class="offer-code" data-code="${lkEscape(o.coupon_code)}" title="Tap to copy"><i class="bi bi-ticket-perforated"></i> ${lkEscape(o.coupon_code)}</button>` : ''}</div>
+                ${o.terms ? `<details class="offer-terms"><summary>Terms &amp; conditions</summary><p>${lkEscape(o.terms)}</p></details>` : ''}
+            </div>
+            <a class="btn btn-success rounded-pill px-4 fw-bold offer-tile-cta" target="_blank" rel="noopener" href="https://wa.me/919878383497?text=${encodeURIComponent(msg)}">Claim offer</a>
+        </article>`;
+    }).join('');
+    box.querySelectorAll('.offer-code').forEach(b => b.addEventListener('click', async () => {
+        try { await navigator.clipboard.writeText(b.dataset.code); const t = b.innerHTML; b.innerHTML = '<i class="bi bi-check2"></i> Copied'; setTimeout(() => { b.innerHTML = t; }, 1500); } catch (_) { /* clipboard unavailable */ }
+    }));
+    const badge = document.getElementById('detailOfferBadge');
+    if (badge) { badge.classList.remove('d-none'); badge.innerHTML = `<i class="bi bi-gift-fill"></i> ${lkEscape(offers[0].headline)} · ${lkEscape(offers[0].title)}`; }
+}
+
 function renderPGCards(pgs, containerId, clickable = true) {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -263,6 +305,7 @@ function renderPGCards(pgs, containerId, clickable = true) {
             <div class="pg-card" data-id="${pg.id}" role="button" tabindex="0" aria-label="View details for ${lkEscape(pg.name)}">
                 <div class="pg-card-img-wrap">
                     <img src="${lkEscape(coverImage)}" class="pg-card-img" alt="${lkEscape(pg.name)}" loading="lazy" onerror="this.src='https://placehold.co/600x400/92C24A/FFFFFF?text=No+Image'">
+                    ${offerRibbonHtml(pg)}
                 </div>
                 <div class="p-3">
                     <div class="d-flex justify-content-between align-items-start mb-2">
@@ -274,6 +317,7 @@ function renderPGCards(pgs, containerId, clickable = true) {
                         <span class="pg-status ${statusClass}">${getStatusText(statusText)}</span>
                         <span class="fw-bold text-success">₹${(pg.rent || 0).toLocaleString('en-IN')}/mo</span>
                     </div>
+                    ${offerLineHtml(pg)}
                     <div class="mt-2 small">
                         <span>🛏 ${pg.total_rooms || 0} rooms</span>
                         <span class="ms-2">🏠 ${pg.empty_rooms != null ? pg.empty_rooms : '—'} vacant rooms</span>
@@ -621,7 +665,7 @@ async function initPGDetailPage() {
         document.getElementById('detailStatus').textContent=getStatusText(status);
         const rating=parseFloat(pg.overall_rating)||0;
         document.getElementById('detailRating').textContent=rating>0?rating.toFixed(1):'New';
-        renderDetailGallery(pg); renderDetailAmenities(extractAmenities(pg)); renderDetailReviews(pg.reviews||[]);
+        renderDetailGallery(pg); renderDetailOffers(pg); renderDetailAmenities(extractAmenities(pg)); renderDetailReviews(pg.reviews||[]);
         const av=document.getElementById('detailAvailabilityText');
         if(av) av.textContent=availableRooms>0?`${availableRooms} completely empty room${availableRooms===1?'':'s'} currently available. Availability can change, so contact LIVINKEY to confirm before booking.`:'This PG currently has no completely empty rooms shown. Contact LIVINKEY for the latest availability.';
         const wa=document.getElementById('whatsappPgBtn');

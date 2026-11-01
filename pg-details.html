@@ -57,7 +57,7 @@
       </div>
       <div class="pg-detail-intro">
         <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
-          <div><span class="detail-eyebrow">LIVINKEY PG</span><h1 id="detailPgName" class="display-5 fw-bold mb-2">PG Name</h1><p class="detail-location mb-0"><i class="bi bi-geo-alt-fill"></i> <span id="detailLocation">Location</span></p></div>
+          <div><span class="detail-eyebrow">LIVINKEY PG</span><h1 id="detailPgName" class="display-5 fw-bold mb-2">PG Name</h1><div id="detailOfferBadge" class="detail-offer-badge d-none"></div><p class="detail-location mb-0"><i class="bi bi-geo-alt-fill"></i> <span id="detailLocation">Location</span></p></div>
           <div class="detail-rating"><span class="rating-star">★</span><strong id="detailRating">New</strong><small>Guest rating</small></div>
         </div>
         <div class="detail-stat-grid mt-4">
@@ -71,6 +71,11 @@
           <a id="whatsappPgBtn" href="https://wa.me/919878383497" target="_blank" rel="noopener" class="btn btn-success rounded-pill px-4 py-3 fw-bold"><i class="bi bi-whatsapp me-2"></i>WhatsApp</a>
         </div>
       </div>
+    </section>
+
+    <section class="detail-section reveal d-none" id="detailOffersSection">
+      <div class="detail-section-heading"><span><i class="bi bi-gift"></i></span><div><p class="eyebrow mb-1">Special offers</p><h2>Offers on this PG</h2></div></div>
+      <div id="detailOffers" class="offer-tiles"></div>
     </section>
 
     <section class="detail-section reveal">

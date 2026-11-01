@@ -2603,3 +2603,20 @@ footer .bi-heart-fill {
     .pg-card-col .pg-card .mt-2.small { display: flex; flex-wrap: wrap; column-gap: .6rem; row-gap: .25rem; line-height: 1.45; overflow-wrap: anywhere; }
     .pg-slider-arrow { width: 36px; height: 36px; }
 }
+
+/* ===== PG offers ===== */
+.pg-card-img-wrap{position:relative;}
+.pg-offer-ribbon{position:absolute; top:12px; left:0; display:flex; align-items:center; gap:.4rem; background:linear-gradient(90deg,#E8590C,#F59F00); color:#fff; font-weight:800; font-size:.8rem; letter-spacing:.02em; padding:.35rem .8rem .35rem .7rem; border-radius:0 999px 999px 0; box-shadow:0 4px 12px rgba(232,89,12,.35); z-index:2;}
+.pg-offer-ribbon small{font-weight:600; opacity:.9; font-size:.68rem;}
+.pg-offer-line{display:flex; align-items:center; gap:.4rem; margin-top:.55rem; font-size:.8rem; font-weight:600; color:#B4590C; background:#FFF4E6; border:1px dashed #F2B36B; border-radius:8px; padding:.3rem .55rem;}
+.pg-offer-line span{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.detail-offer-badge{display:inline-flex; align-items:center; gap:.45rem; background:#FFF4E6; color:#B4590C; border:1px solid #F2B36B; border-radius:999px; padding:.3rem .85rem; font-weight:700; font-size:.85rem; margin-bottom:.5rem;}
+.offer-tiles{display:grid; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); gap:1rem;}
+.offer-tile{position:relative; display:flex; flex-direction:column; gap:.7rem; background:#fff; border:1px solid #F2D2A6; border-radius:18px; padding:1.1rem 1.1rem 1.1rem 1.1rem; box-shadow:0 8px 24px rgba(232,89,12,.08); overflow:hidden;}
+.offer-tile::before{content:""; position:absolute; inset:0 auto 0 0; width:5px; background:linear-gradient(#E8590C,#F59F00);}
+.offer-tile-badge{align-self:flex-start; background:linear-gradient(90deg,#E8590C,#F59F00); color:#fff; font-weight:800; font-size:.95rem; padding:.3rem .8rem; border-radius:999px;}
+.offer-tile h4{font-size:1.05rem; font-weight:800; margin:0;} .offer-tile p{margin:.25rem 0 0; color:var(--ink-soft,#555); font-size:.9rem;}
+.offer-tile-meta{display:flex; flex-wrap:wrap; gap:.6rem; align-items:center; font-size:.82rem; color:#6b6b6b; margin-top:.4rem;}
+.offer-code{border:1.5px dashed #E8590C; background:#FFF4E6; color:#B4590C; font-weight:800; border-radius:8px; padding:.2rem .6rem; cursor:pointer; letter-spacing:.06em;}
+.offer-terms{font-size:.8rem; color:#777; margin-top:.35rem;} .offer-terms summary{cursor:pointer; font-weight:600;}
+.offer-tile-cta{margin-top:auto; align-self:flex-start;}
