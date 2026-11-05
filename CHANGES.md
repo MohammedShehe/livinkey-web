@@ -40,3 +40,15 @@
 - Backend was smoke-tested (auth, tokens, webhook rejection, CORS) but not against your live DB or gateways.
 - I made targeted UX improvements, not a ground-up visual redesign of all 27k lines of app UI.
 - Login/OTP lockouts are in-memory (fine for one server instance; use Redis if you scale out).
+
+---
+
+## v3 update — offers + manual room counts (needs the v3 admin backend)
+
+- **Offer price:** PG cards and the PG page show the old rent crossed out and the new offer rent
+  (only percentage / flat offers change the price). Offer tiles also show "You save ₹…".
+- **Countdown:** live "Ends in 7h 12m" on the card, the PG page badge and each offer tile. It turns red in the last
+  hour and the offer (and the crossed-out price) disappears the moment it reaches zero. It uses the server's
+  `seconds_left`, so a wrong visitor clock can't break it.
+- **Room counts:** `🛏 rooms / 🏠 vacant rooms` now use the API's `total_rooms` / `vacant_rooms`, i.e. the live data or the
+  numbers an admin typed in (PGs → door icon). This also removes the extra per-PG request the list used to make.

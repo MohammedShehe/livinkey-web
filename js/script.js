@@ -93,6 +93,16 @@ async function fetchPGStats() {
     return data;
 }
 
+// Turn the server's "seconds_left" into an absolute end time on this device
+// (done once, when the data arrives, so cached data keeps counting down correctly).
+function stampOffers(pg) {
+    if (!pg || !Array.isArray(pg.offers)) return pg;
+    pg.offers.forEach(o => {
+        if (o._endsAt === undefined) o._endsAt = (o.seconds_left === null || o.seconds_left === undefined) ? null : Date.now() + Number(o.seconds_left) * 1000;
+    });
+    return pg;
+}
+
 async function fetchAllPGs(filters = {}) {
     const cacheKey = 'pgs';
     const cached = getCached(cacheKey);
@@ -115,6 +125,7 @@ async function fetchAllPGs(filters = {}) {
     const data = result.data || result || [];
 
     const pgsArray = Array.isArray(data) ? data : [];
+    pgsArray.forEach(stampOffers);
 
     if (Object.keys(filters).length === 0) {
         setCache(cacheKey, pgsArray);
@@ -130,6 +141,7 @@ async function fetchPGDetails(pgId) {
 
     const result = await apiFetch(`/public/pgs/${pgId}`);
     const data = result.data || result;
+    stampOffers(data);
     setCache(cacheKey, data);
     return data;
 }
@@ -214,9 +226,18 @@ function countEmptyRooms(pg) {
     return availableRooms;
 }
 
+// Vacant rooms to show visitors: the server's number (live data, or the number an
+// admin typed in when manual room counts are on), else counted from the floors.
+function pgVacantRooms(pg) {
+    if (pg && pg.vacant_rooms !== null && pg.vacant_rooms !== undefined) return Number(pg.vacant_rooms);
+    if (pg && pg.empty_rooms != null) return pg.empty_rooms;
+    return countEmptyRooms(pg);
+}
+
 async function enrichPGsWithEmptyRooms(pgs) {
     if (!Array.isArray(pgs) || pgs.length === 0) return pgs || [];
     return Promise.all(pgs.map(async (pg) => {
+        if (pg.vacant_rooms !== null && pg.vacant_rooms !== undefined) return { ...pg, empty_rooms: Number(pg.vacant_rooms) };
         if (pg.empty_rooms != null) return pg;
         if (Array.isArray(pg.floors)) {
             return { ...pg, empty_rooms: countEmptyRooms(pg) };
@@ -233,7 +254,33 @@ async function enrichPGsWithEmptyRooms(pgs) {
 // ---------------------------------------------------------------------------
 // OFFERS (managed by admins; only live offers are returned by the API)
 // ---------------------------------------------------------------------------
-function pgOffers(pg) { return Array.isArray(pg && pg.offers) ? pg.offers : []; }
+// Only offers that have not run out (an offer drops off the page the moment its counter hits zero).
+function pgOffers(pg) {
+    const all = Array.isArray(pg && pg.offers) ? pg.offers : [];
+    return all.filter(o => !o._endsAt || o._endsAt > Date.now());
+}
+const fmtInr = (n) => '\u20B9' + Number(n || 0).toLocaleString('en-IN');
+function bestPriceOffer(pg) { return pgOffers(pg).find(o => o.has_price_cut && o.offer_price != null) || null; }
+
+// New price with the old price crossed out (or the normal price when there is no price offer).
+function priceHtml(pg, suffix = '/mo') {
+    const o = bestPriceOffer(pg), rent = Number(pg.rent) || 0;
+    if (!o) return `${fmtInr(rent)}${suffix}`;
+    return `<span class="pg-price-wrap"><s class="pg-price-old">${fmtInr(o.original_price)}</s> <span class="pg-price-new">${fmtInr(o.offer_price)}</span>${suffix}</span>`;
+}
+
+// Live "Ends in 7h 12m" counter (ticked by tickOfferCountdowns below).
+function countdownHtml(o) {
+    if (!o || !o._endsAt) return '';
+    return `<span class="offer-countdown" data-end="${o._endsAt}"><i class="bi bi-alarm"></i> Ends in <b></b></span>`;
+}
+function fmtCountdown(ms) {
+    const s = Math.max(0, Math.floor(ms / 1000)), d = Math.floor(s / 86400), h = Math.floor((s % 86400) / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+    if (d >= 1) return `${d}d ${h}h`;
+    if (h >= 1) return `${h}h ${m}m`;
+    return `${m}m ${String(sec).padStart(2, '0')}s`;
+}
+
 function offerRibbonHtml(pg) {
     const o = pgOffers(pg); if (!o.length) return '';
     const more = o.length > 1 ? `<small>+${o.length - 1} more</small>` : '';
@@ -241,24 +288,57 @@ function offerRibbonHtml(pg) {
 }
 function offerLineHtml(pg) {
     const o = pgOffers(pg); if (!o.length) return '';
-    return `<div class="pg-offer-line"><i class="bi bi-stars"></i><span>${lkEscape(o[0].title)}</span></div>`;
+    return `<div class="pg-offer-line"><i class="bi bi-stars"></i><span>${lkEscape(o[0].title)}</span></div>` +
+        (o[0]._endsAt ? `<div class="pg-offer-timer">${countdownHtml(o[0])}</div>` : '');
 }
+// Fills the offer parts of a PG card (ribbon, price, offer line + counter). Called on render and again when an offer ends.
+function fillCardOffers(card, pg) {
+    const r = card.querySelector('.pg-offer-ribbon-slot'), p = card.querySelector('.pg-price-slot'), x = card.querySelector('.pg-offer-extra-slot');
+    if (r) r.innerHTML = offerRibbonHtml(pg);
+    if (p) p.innerHTML = priceHtml(pg);
+    if (x) x.innerHTML = offerLineHtml(pg);
+    tickOfferCountdowns();
+}
+function tickOfferCountdowns() {
+    const now = Date.now();
+    document.querySelectorAll('[data-end]').forEach(el => {
+        const left = Number(el.dataset.end) - now;
+        if (left <= 0) {
+            const card = el.closest('.pg-card');
+            if (card && card._pg) { fillCardOffers(card, card._pg); return; }
+            if (el.closest('#detailOffers') || el.closest('#detailOfferBadge') || el.closest('#detailRent')) { if (window.__detailPg) refreshDetailOffers(window.__detailPg); return; }
+            el.remove();
+            return;
+        }
+        const b = el.querySelector('b'); if (b) b.textContent = fmtCountdown(left);
+        el.classList.toggle('urgent', left < 3600000);
+    });
+}
+if (!window.__offerTicker) { window.__offerTicker = setInterval(tickOfferCountdowns, 1000); }
 function fmtOfferDate(d) { if (!d) return ''; const x = new Date(d + 'T00:00:00'); return isNaN(x) ? '' : x.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }); }
+// Re-draws everything on the detail page that depends on offers (used when an offer ends).
+function refreshDetailOffers(pg) {
+    renderDetailOffers(pg);
+    const rentEl = document.getElementById('detailRent');
+    if (rentEl) rentEl.innerHTML = priceHtml(pg, '');
+}
 function renderDetailOffers(pg) {
     const wrap = document.getElementById('detailOffersSection'), box = document.getElementById('detailOffers');
     if (!wrap || !box) return;
     const offers = pgOffers(pg);
-    if (!offers.length) { wrap.classList.add('d-none'); return; }
+    const badge0 = document.getElementById('detailOfferBadge');
+    if (!offers.length) { wrap.classList.add('d-none'); if (badge0) badge0.classList.add('d-none'); return; }
     wrap.classList.remove('d-none');
     box.innerHTML = offers.map((o, i) => {
-        const until = o.valid_until ? `Valid till ${fmtOfferDate(o.valid_until)}` : 'Limited-time offer';
+        const until = o._endsAt ? '' : (o.valid_until ? `Valid till ${fmtOfferDate(o.valid_until)}` : 'Limited-time offer');
         const msg = `Hi LIVINKEY, I'd like to claim the offer "${o.title}"${o.coupon_code ? ' (code ' + o.coupon_code + ')' : ''} at ${pg.name || 'this PG'}.`;
         return `<article class="offer-tile">
             <div class="offer-tile-badge">${lkEscape(o.headline)}</div>
             <div class="offer-tile-body">
                 <h4>${lkEscape(o.title)}</h4>
+                ${o.has_price_cut ? `<div class="offer-tile-price"><s>${fmtInr(o.original_price)}</s> <b>${fmtInr(o.offer_price)}</b><small>/month</small> <span class="offer-save">You save ${fmtInr(o.discount_amount)}</span></div>` : ''}
                 ${o.description ? `<p>${lkEscape(o.description)}</p>` : ''}
-                <div class="offer-tile-meta"><span><i class="bi bi-clock"></i> ${lkEscape(until)}</span>
+                <div class="offer-tile-meta">${o._endsAt ? countdownHtml(o) : `<span><i class="bi bi-clock"></i> ${lkEscape(until)}</span>`}
                     ${o.coupon_code ? `<button type="button" class="offer-code" data-code="${lkEscape(o.coupon_code)}" title="Tap to copy"><i class="bi bi-ticket-perforated"></i> ${lkEscape(o.coupon_code)}</button>` : ''}</div>
                 ${o.terms ? `<details class="offer-terms"><summary>Terms &amp; conditions</summary><p>${lkEscape(o.terms)}</p></details>` : ''}
             </div>
@@ -269,7 +349,8 @@ function renderDetailOffers(pg) {
         try { await navigator.clipboard.writeText(b.dataset.code); const t = b.innerHTML; b.innerHTML = '<i class="bi bi-check2"></i> Copied'; setTimeout(() => { b.innerHTML = t; }, 1500); } catch (_) { /* clipboard unavailable */ }
     }));
     const badge = document.getElementById('detailOfferBadge');
-    if (badge) { badge.classList.remove('d-none'); badge.innerHTML = `<i class="bi bi-gift-fill"></i> ${lkEscape(offers[0].headline)} · ${lkEscape(offers[0].title)}`; }
+    if (badge) { badge.classList.remove('d-none'); badge.innerHTML = `<i class="bi bi-gift-fill"></i> ${lkEscape(offers[0].headline)} · ${lkEscape(offers[0].title)}${offers[0]._endsAt ? ' · ' + countdownHtml(offers[0]) : ''}`; }
+    tickOfferCountdowns();
 }
 
 function renderPGCards(pgs, containerId, clickable = true) {
@@ -305,7 +386,7 @@ function renderPGCards(pgs, containerId, clickable = true) {
             <div class="pg-card" data-id="${pg.id}" role="button" tabindex="0" aria-label="View details for ${lkEscape(pg.name)}">
                 <div class="pg-card-img-wrap">
                     <img src="${lkEscape(coverImage)}" class="pg-card-img" alt="${lkEscape(pg.name)}" loading="lazy" onerror="this.src='https://placehold.co/600x400/92C24A/FFFFFF?text=No+Image'">
-                    ${offerRibbonHtml(pg)}
+                    <div class="pg-offer-ribbon-slot"></div>
                 </div>
                 <div class="p-3">
                     <div class="d-flex justify-content-between align-items-start mb-2">
@@ -315,17 +396,19 @@ function renderPGCards(pgs, containerId, clickable = true) {
                     <p class="small text-muted mb-2"><i class="bi bi-geo-alt"></i> ${lkEscape(pg.location || 'Location TBD')}</p>
                     <div class="d-flex justify-content-between align-items-center">
                         <span class="pg-status ${statusClass}">${getStatusText(statusText)}</span>
-                        <span class="fw-bold text-success">₹${(pg.rent || 0).toLocaleString('en-IN')}/mo</span>
+                        <span class="fw-bold text-success pg-price-slot"></span>
                     </div>
-                    ${offerLineHtml(pg)}
+                    <div class="pg-offer-extra-slot"></div>
                     <div class="mt-2 small">
                         <span>🛏 ${pg.total_rooms || 0} rooms</span>
-                        <span class="ms-2">🏠 ${pg.empty_rooms != null ? pg.empty_rooms : '—'} vacant rooms</span>
+                        <span class="ms-2">🏠 ${pgVacantRooms(pg) != null ? pgVacantRooms(pg) : '—'} vacant rooms</span>
                     </div>
                 </div>
             </div>
         `;
         container.appendChild(col);
+        const cardEl = col.querySelector('.pg-card');
+        if (cardEl) { cardEl._pg = pg; fillCardOffers(cardEl, pg); }
     });
 
     if (clickable) {
@@ -657,17 +740,18 @@ async function initPGDetailPage() {
         document.getElementById('detailPgName').textContent=pg.name||'PG Name';
         document.getElementById('detailLocation').textContent=pg.location||'Location TBD';
         document.getElementById('detailRooms').textContent=pg.total_rooms||0;
-        const availableRooms = countEmptyRooms(pg) ?? 0;
+        const availableRooms = pgVacantRooms(pg) ?? 0;
         document.getElementById('detailAvailable').textContent=availableRooms;
         const rentNum = parseFloat(pg.rent) || 0;
-        document.getElementById('detailRent').textContent = '₹' + rentNum.toLocaleString('en-IN');
+        window.__detailPg = pg;
+        document.getElementById('detailRent').innerHTML = priceHtml(pg, '');
         const status=pg.status_text||'Vacant';
         document.getElementById('detailStatus').textContent=getStatusText(status);
         const rating=parseFloat(pg.overall_rating)||0;
         document.getElementById('detailRating').textContent=rating>0?rating.toFixed(1):'New';
         renderDetailGallery(pg); renderDetailOffers(pg); renderDetailAmenities(extractAmenities(pg)); renderDetailReviews(pg.reviews||[]);
         const av=document.getElementById('detailAvailabilityText');
-        if(av) av.textContent=availableRooms>0?`${availableRooms} completely empty room${availableRooms===1?'':'s'} currently available. Availability can change, so contact LIVINKEY to confirm before booking.`:'This PG currently has no completely empty rooms shown. Contact LIVINKEY for the latest availability.';
+        if(av) av.textContent=availableRooms>0?`${availableRooms} vacant room${availableRooms===1?'':'s'} currently available. Availability can change, so contact LIVINKEY to confirm before booking.`:'This PG currently has no vacant rooms shown. Contact LIVINKEY for the latest availability.';
         const wa=document.getElementById('whatsappPgBtn');
         if(wa) wa.href=`https://wa.me/919878383497?text=${encodeURIComponent(`Hi LIVINKEY, I want to enquire about ${pg.name||'this PG'}${pg.location?` in ${pg.location}`:''}.`)}`;
         const contact=document.getElementById('contactPgBtn');

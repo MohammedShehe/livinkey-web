@@ -2620,3 +2620,17 @@ footer .bi-heart-fill {
 .offer-code{border:1.5px dashed #E8590C; background:#FFF4E6; color:#B4590C; font-weight:800; border-radius:8px; padding:.2rem .6rem; cursor:pointer; letter-spacing:.06em;}
 .offer-terms{font-size:.8rem; color:#777; margin-top:.35rem;} .offer-terms summary{cursor:pointer; font-weight:600;}
 .offer-tile-cta{margin-top:auto; align-self:flex-start;}
+
+/* ---- offer price strike-through + countdown ---- */
+.pg-price-old{color:#9a9a9a; font-weight:600; font-size:.8em; text-decoration-color:#d63a3a; text-decoration-thickness:2px;}
+.pg-price-new{color:#2f9e44; font-weight:800;}
+.pg-offer-timer{margin-top:.35rem;}
+.offer-countdown{display:inline-flex; align-items:center; gap:.3rem; font-size:.75rem; font-weight:700; color:#B4590C; background:#FFF4E6; border:1px solid #F2B36B; border-radius:6px; padding:.15rem .5rem; white-space:nowrap;}
+.offer-countdown b{font-variant-numeric:tabular-nums; font-weight:800;}
+.offer-countdown.urgent{color:#c92a2a; background:#FFF0F0; border-color:#F5A3A3;}
+.detail-offer-badge .offer-countdown{margin-left:.15rem;}
+.offer-tile-price{display:flex; flex-wrap:wrap; align-items:baseline; gap:.45rem; margin:.1rem 0 .2rem;}
+.offer-tile-price s{color:#9a9a9a; font-weight:600; text-decoration-color:#d63a3a; text-decoration-thickness:2px;}
+.offer-tile-price b{color:#2f9e44; font-size:1.35rem; font-weight:800;}
+.offer-tile-price small{color:#6b6b6b;}
+.offer-save{font-size:.75rem; font-weight:700; color:#2f9e44; background:#EBFBEE; border-radius:999px; padding:.1rem .5rem;}
