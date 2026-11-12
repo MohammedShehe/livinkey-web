@@ -543,31 +543,96 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
     box-shadow: var(--shadow-lg);
 }
 
-/* QR download modal — scanner-frame styling */
-.qr-frame {
+/* ===================== APP DOWNLOAD MODAL ===================== */
+.app-modal-dialog { max-width: 640px; }
+.app-modal {
     position: relative;
-    width: 132px;
-    height: 132px;
-    margin: 0 auto 12px;
-    padding: 6px;
-    background: var(--paper-alt);
-    border-radius: 14px;
-}
-.qr-frame img { width: 100%; height: 100%; border-radius: 8px; display: block; }
-.qr-frame::before, .qr-frame::after,
-.qr-corner-tl, .qr-corner-br { content: ""; position: absolute; width: 18px; height: 18px; }
-.qr-frame::before { top: -3px; left: -3px; border-top: 3px solid var(--green); border-left: 3px solid var(--green); border-radius: 6px 0 0 0; }
-.qr-frame::after { bottom: -3px; right: -3px; border-bottom: 3px solid var(--green); border-right: 3px solid var(--green); border-radius: 0 0 6px 0; }
-
-.app-download-tab {
-    padding: 18px 14px;
-    border-radius: var(--radius-md);
+    border: none;
+    overflow: hidden;
     background: var(--paper);
-    border: 1px solid var(--line);
-    transition: box-shadow 0.3s var(--ease), transform 0.3s var(--ease);
-    width: 100%;
 }
-.app-download-tab:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.app-modal::before {
+    content: "";
+    position: absolute; inset: 0 0 auto 0; height: 5px;
+    background: linear-gradient(90deg, var(--green-deep), var(--green));
+}
+.app-modal-close { position: absolute; top: 16px; right: 16px; z-index: 2; }
+.app-modal-head { padding: 34px 32px 8px; text-align: center; }
+.app-modal-eyebrow {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 12px; border-radius: 999px;
+    background: var(--green-tint); color: var(--green-deep);
+    font-size: 0.74rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+}
+.app-modal-title { margin: 14px 0 6px; font-weight: 800; font-size: 1.45rem; letter-spacing: -0.01em; color: var(--ink); }
+.app-modal-sub { margin: 0; color: var(--ink-soft); font-size: 0.95rem; }
+.app-modal-body {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    padding: 22px 28px 30px;
+}
+.app-store-card {
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+    padding: 18px 16px 18px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    transition: box-shadow 0.3s var(--ease), transform 0.3s var(--ease), border-color 0.3s var(--ease);
+}
+.app-store-card.is-live { border-color: rgba(94, 138, 46, 0.35); box-shadow: var(--shadow-sm); }
+.app-store-card.is-live:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); border-color: var(--green); }
+.app-store-label {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-weight: 700; font-size: 0.95rem; color: var(--ink); margin-bottom: 14px;
+}
+.app-store-label i { color: var(--green-deep); font-size: 1.1rem; }
+.app-qr {
+    position: relative;
+    width: 188px; height: 188px; padding: 4px;
+    background: #fff; border-radius: 14px;
+    box-shadow: 0 0 0 1px var(--line-strong);
+}
+.app-qr img { width: 100%; height: 100%; display: block; border-radius: 10px; image-rendering: -webkit-optimize-contrast; }
+.app-qr::before, .app-qr::after { content: ""; position: absolute; width: 22px; height: 22px; pointer-events: none; }
+.app-qr::before { top: -4px; left: -4px; border-top: 3px solid var(--green); border-left: 3px solid var(--green); border-radius: 10px 0 0 0; }
+.app-qr::after { bottom: -4px; right: -4px; border-bottom: 3px solid var(--green); border-right: 3px solid var(--green); border-radius: 0 0 10px 0; }
+.app-scan-hint {
+    margin: 14px 0 14px; font-size: 0.82rem; color: var(--ink-soft);
+    display: inline-flex; align-items: center; gap: 6px;
+}
+.app-scan-hint i { color: var(--green-deep); }
+.app-play-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    width: 100%; margin-top: auto;
+    padding: 9px 16px; border-radius: 12px;
+    background: var(--ink); color: #fff; text-decoration: none;
+    border: 1px solid var(--ink);
+    transition: background 0.25s var(--ease), transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
+}
+.app-play-btn i { font-size: 1.5rem; line-height: 1; }
+.app-play-btn span { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.1; text-align: left; }
+.app-play-btn small { font-size: 0.6rem; font-weight: 600; letter-spacing: 0.08em; opacity: 0.8; }
+.app-play-btn strong { font-size: 1.05rem; font-weight: 700; }
+a.app-play-btn:hover, a.app-play-btn:focus-visible { background: var(--green-deep); border-color: var(--green-deep); color: #fff; transform: translateY(-1px); box-shadow: var(--shadow-green); }
+.app-play-btn.is-disabled { background: #E9ECE2; border-color: #E9ECE2; color: #7A8070; cursor: not-allowed; }
+.app-store-card.is-soon { background: var(--paper-alt); border-style: dashed; }
+.app-soon-art {
+    width: 188px; height: 188px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    background: repeating-linear-gradient(135deg, rgba(20,23,15,0.03) 0 10px, transparent 10px 20px);
+    color: rgba(20, 23, 15, 0.22); font-size: 4rem;
+}
+
+/* On phones the QR is pointless (you are already on the device) — lead with the button */
+@media (max-width: 575.98px) {
+    .app-modal-dialog { margin-left: 14px; margin-right: 14px; }
+    .app-modal-head { padding: 30px 20px 4px; }
+    .app-modal-title { font-size: 1.25rem; }
+    .app-modal-body { grid-template-columns: 1fr; padding: 18px 18px 22px; gap: 12px; }
+    .app-qr, .app-store-card.is-live .app-scan-hint, .app-soon-art { display: none; }
+    .app-store-card { padding: 16px; }
+    .app-store-label { margin-bottom: 12px; }
+    .app-store-card.is-soon .app-scan-hint { margin: 0 0 12px; }
+}
 
 /* PG detail modal */
 #detailCarousel { border-radius: var(--radius-md); overflow: hidden; }

@@ -1738,7 +1738,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const btn = document.getElementById(id);
         if (btn) wrapButtonLabel(btn);
     });
-    document.querySelectorAll('.app-download-tab').forEach(btn => wrapButtonLabel(btn));
 
     document.querySelectorAll('section, .about-card, .contact-info, .map-container').forEach(el => {
         if (!el.classList.contains('reveal')) el.classList.add('reveal');

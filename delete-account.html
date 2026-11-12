@@ -87,6 +87,44 @@
         </div>
     </nav>
 
+    <!-- APP DOWNLOAD MODAL -->
+    <div class="modal fade" id="appModal" tabindex="-1" aria-labelledby="appModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered app-modal-dialog">
+            <div class="modal-content app-modal">
+                <button type="button" class="btn-close app-modal-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="app-modal-head">
+                    <span class="app-modal-eyebrow"><i class="bi bi-phone"></i> Livinkey Mobile App</span>
+                    <h5 class="app-modal-title" id="appModalLabel">Download the Livinkey App</h5>
+                    <p class="app-modal-sub">Manage your stay, payments and requests right from your phone.</p>
+                </div>
+                <div class="app-modal-body">
+                    <!-- ANDROID (live) -->
+                    <div class="app-store-card is-live">
+                        <div class="app-store-label"><i class="bi bi-android2"></i> Android</div>
+                        <div class="app-qr">
+                            <img src="assets/qr-android.png" width="180" height="180" alt="Scan this QR code to download the Livinkey app from Google Play" loading="lazy" />
+                        </div>
+                        <p class="app-scan-hint"><i class="bi bi-qr-code-scan"></i> Scan with your phone camera</p>
+                        <a href="https://play.google.com/store/apps/details?id=com.livinkey.app" target="_blank" rel="noopener" class="app-play-btn" aria-label="Get Livinkey on Google Play">
+                            <i class="bi bi-google-play"></i>
+                            <span><small>GET IT ON</small><strong>Google Play</strong></span>
+                        </a>
+                    </div>
+                    <!-- iOS (coming soon) -->
+                    <div class="app-store-card is-soon">
+                        <div class="app-store-label"><i class="bi bi-apple"></i> iPhone &amp; iPad</div>
+                        <div class="app-soon-art"><i class="bi bi-apple"></i></div>
+                        <p class="app-scan-hint">The iOS app is on its way</p>
+                        <span class="app-play-btn is-disabled" aria-disabled="true">
+                            <i class="bi bi-apple"></i>
+                            <span><small>COMING SOON</small><strong>App Store</strong></span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- HERO -->
     <section class="delete-hero">
         <div class="container">

@@ -43,26 +43,38 @@
         </div>
     </nav>
 
-    <!-- APP MODAL with QR codes -->
-    <div class="modal fade" id="appModal" tabindex="-1">
-        <div class="modal-dialog modal-sm modal-dialog-centered">
-            <div class="modal-content p-3 border-0 shadow-lg">
-                <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title fw-bold">Get the App</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <!-- APP DOWNLOAD MODAL -->
+    <div class="modal fade" id="appModal" tabindex="-1" aria-labelledby="appModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered app-modal-dialog">
+            <div class="modal-content app-modal">
+                <button type="button" class="btn-close app-modal-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="app-modal-head">
+                    <span class="app-modal-eyebrow"><i class="bi bi-phone"></i> Livinkey Mobile App</span>
+                    <h5 class="app-modal-title" id="appModalLabel">Download the Livinkey App</h5>
+                    <p class="app-modal-sub">Manage your stay, payments and requests right from your phone.</p>
                 </div>
-                <div class="modal-body d-flex flex-column gap-3 pt-3 align-items-center">
-                    <div class="app-download-tab text-center">
-                        <div class="qr-frame">
-                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://play.google.com/store/apps/details?id=com.livinkey" alt="PlayStore QR" />
+                <div class="app-modal-body">
+                    <!-- ANDROID (live) -->
+                    <div class="app-store-card is-live">
+                        <div class="app-store-label"><i class="bi bi-android2"></i> Android</div>
+                        <div class="app-qr">
+                            <img src="assets/qr-android.png" width="180" height="180" alt="Scan this QR code to download the Livinkey app from Google Play" loading="lazy" />
                         </div>
-                        <a href="#" class="btn btn-dark rounded-pill py-2 w-100"><i class="bi bi-google-play me-2"></i>PlayStore</a>
+                        <p class="app-scan-hint"><i class="bi bi-qr-code-scan"></i> Scan with your phone camera</p>
+                        <a href="https://play.google.com/store/apps/details?id=com.livinkey.app" target="_blank" rel="noopener" class="app-play-btn" aria-label="Get Livinkey on Google Play">
+                            <i class="bi bi-google-play"></i>
+                            <span><small>GET IT ON</small><strong>Google Play</strong></span>
+                        </a>
                     </div>
-                    <div class="app-download-tab text-center">
-                        <div class="qr-frame">
-                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://apps.apple.com/app/livinkey/id123456789" alt="AppStore QR" />
-                        </div>
-                        <a href="#" class="btn btn-dark rounded-pill py-2 w-100"><i class="bi bi-apple me-2"></i>AppStore</a>
+                    <!-- iOS (coming soon) -->
+                    <div class="app-store-card is-soon">
+                        <div class="app-store-label"><i class="bi bi-apple"></i> iPhone &amp; iPad</div>
+                        <div class="app-soon-art"><i class="bi bi-apple"></i></div>
+                        <p class="app-scan-hint">The iOS app is on its way</p>
+                        <span class="app-play-btn is-disabled" aria-disabled="true">
+                            <i class="bi bi-apple"></i>
+                            <span><small>COMING SOON</small><strong>App Store</strong></span>
+                        </span>
                     </div>
                 </div>
             </div>
